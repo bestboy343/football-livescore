@@ -1,51 +1,42 @@
-const API_KEY = process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
-const BASE_URL = "https://v3.football.api-sports.io";
+"use client";
+import { useState, useEffect } from 'react';
+import { footballService, Match } from '@/services/apiService';
 
-const headers = {
-  "x-apisports-key": API_KEY as string,
-};
-
-export const footballService = {
-  todayMatches: async () => {
-    const today = new Date().toISOString().split('T')[0];
-    const res = await fetch(`${BASE_URL}/fixtures?date=${today}`, { headers });
-    const json = await res.json();
-    return json.response.map((f: any) => ({
-      id: f.fixture.id,
-      homeTeam: f.teams.home.name,
-      awayTeam: f.teams.away.name,
-      homeLogo: f.teams.home.logo,
-      awayLogo: f.teams.away.logo,
-      homeScore: f.goals.home,
-      awayScore: f.goals.away,
-      status: f.fixture.status.short,
-      time: f.fixture.status.elapsed? `${f.fixture.status.elapsed}'` : f.fixture.status.short,
-      league: f.league.name,
-      isLive: ["1H","2H","HT","ET","P","LIVE"].includes(f.fixture.status.short)
-    }));
-  },
-
-  liveMatches: async () => {
-    const res = await fetch(`${BASE_URL}/fixtures?live=all`, { headers });
-    const json = await res.json();
-    return json.response;
-  },
-
-  // keep other methods so app doesn't break
-  upcomingMatches: async () => [],
-  leagues: async () => [],
-  leagueStandings: async () => [],
-  previousMatches: async () => [],
-  getSingleLeague: async () => null,
-  getSingleLeagueMatches: async () => [],
-  getSingleLeaguePrevMatches: async () => [],
-  getMatchDetails: async () => null,
-  getSingleCompetitionScorers: async () => [],
-  getSingleTeamMatches: async () => [],
-  getTeamInfo: async () => null,
-  getSinglePlayer: async () => null,
-  newsList: async () => [],
-  newsSingle: async () => null,
-};
-
-export default footballService;
+export function useTodayMatches() {
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    footballService.getTodayMatches().then(setMatches).finally(()=>setLoading(false));
+  }, []);
+  return { matches, loading };
+}
+export function useLiveMatches() {
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const load = () => footballService.getLiveMatches().then(setMatches).finally(()=>setLoading(false));
+    load();
+    const i = setInterval(load, 30000);
+    return () => clearInterval(i);
+  }, []);
+  return { matches, loading };
+}
+export function useNewsList() { return { news: [], loading: false }; }
+export function useFeaturedNews() { return { news: [], loading: false }; }
+export function useHeadCarousel() { return { news: [], loading: false }; }
+export function useNewsDetail(id: any) { return { news: null, loading: false }; }
+export function usePlayers() { return { players: [], loading: false }; }
+export function usePlayerDetail(id: any) { return { player: null, loading: false }; }
+export function useTeams() { return { teams: [], loading: false }; }
+export function useTeamDetail(id: any) { return { team: null, loading: false }; }
+export function useLeaguesList() { return { leagues: [], loading: false }; }
+export function useLeagueDetail(id: any) { return { league: null, loading: false }; }
+export function useTournify() { return { data: null, loading: false }; }
+export function useMatchBrief() { return { data: null, loading: false }; }
+export function useNewsTrivory() { return { data: null, loading: false }; }
+export function useMatchDetail(id: any) { return { match: null, loading: false }; }
+export function getSinglePlayer() { return null; }
+export function getSingleTeam() { return null; }
+export function getSingleLeague() { return null; }
+export function nextMatch() { return null; }
+export function nextSingle() { return null; }
