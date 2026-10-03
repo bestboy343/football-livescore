@@ -2,62 +2,83 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const leagues = [
-"Premier League - England", "La Liga - Spain", "Bundesliga - Germany", "Serie A - Italy", "Ligue 1 - France",
-"NPFL - Nigeria", "Champions League - Europe", "Europa League - Europe", "Conference League - Europe", "Eredivisie - Netherlands",
-"Primeira Liga - Portugal", "Belgian Pro League - Belgium", "Scottish Premiership - Scotland", "Super Lig - Turkey", "Premier League - Russia",
-"Ukrainian Premier League - Ukraine", "Super League - Greece", "Austrian Bundesliga - Austria", "Swiss Super League - Switzerland", "Danish Superliga - Denmark",
-"Eliteserien - Norway", "Allsvenskan - Sweden", "Veikkausliiga - Finland", "Ekstraklasa - Poland", "Czech First League - Czech Republic",
-"MLS - USA", "Liga MX - Mexico", "Brasileirao - Brazil", "Primera Division - Argentina", "Primera Division - Chile",
-"Liga Pro - Ecuador", "Primera Division - Uruguay", "Liga 1 - Peru", "Primera Division - Colombia", "Primera Division - Paraguay",
-"Saudi Pro League - Saudi Arabia", "UAE Pro League - UAE", "Qatar Stars League - Qatar", "Persian Gulf Pro League - Iran", "Super League - India",
-"J1 League - Japan", "K League 1 - South Korea", "A-League - Australia", "Chinese Super League - China", "Thai League 1 - Thailand",
-"Egypt Premier League - Egypt", "Botola Pro - Morocco", "Ligue 1 - Algeria", "Tunisian Ligue 1 - Tunisia", "Premier League - South Africa",
-"Premier League - Ghana", "Premier League - Kenya", "Premier League - Tanzania", "Super League - Zambia", "NPFL Women - Nigeria",
-"Championship - England", "La Liga 2 - Spain", "2. Bundesliga - Germany", "Serie B - Italy", "Ligue 2 - France",
-"Eerste Divisie - Netherlands", "Liga Portugal 2 - Portugal", "Challenger Pro League - Belgium", "Championship - Scotland", "1. Lig - Turkey",
-"J2 League - Japan", "K League 2 - South Korea", "Serie B - Brazil", "Primera Nacional - Argentina", "MLS Next Pro - USA",
-"Copa Libertadores - South America", "Copa Sudamericana - South America", "AFCON - Africa", "AFCON Qualifiers - Africa", "World Cup - World",
-"World Cup Qualifiers - World", "Euro - Europe", "Euro Qualifiers - Europe", "Nations League - Europe", "Copa America - South America",
-"FA Cup - England", "Copa del Rey - Spain", "DFB Pokal - Germany", "Coppa Italia - Italy", "Coupe de France - France",
-"KNVB Cup - Netherlands", "Taca de Portugal - Portugal", "Belgian Cup - Belgium", "Scottish Cup - Scotland", "Turkish Cup - Turkey",
-"US Open Cup - USA", "Copa MX - Mexico", "Copa do Brasil - Brazil", "Copa Argentina - Argentina", "Emperor's Cup - Japan",
-"FA Cup - Egypt", "Throne Cup - Morocco", "FA Cup - Nigeria", "King's Cup - Saudi Arabia", "President's Cup - UAE",
-"Premier League - Ireland", "Welsh Premier League - Wales", "NIFL Premiership - N. Ireland", "Super League - Albania", "First League - Armenia",
-"Premier League - Azerbaijan", "Premier League - Belarus", "Premier League - Bosnia", "First League - Bulgaria", "First League - Croatia",
-"First Division - Cyprus", "Super Liga - Slovakia", "Prva Liga - Slovenia", "Meistriliiga - Estonia", "Virsliga - Latvia",
-"A Lyga - Lithuania", "Premier League - Malta", "First League - Moldova", "First League - Montenegro", "Super Liga - Serbia",
-"Premier League - Israel", "Premier League - Georgia", "Premier League - Kazakhstan", "Super League - Uzbekistan", "Premier League - Iceland",
-"Premier League - Luxembourg", "First League - North Macedonia", "Eliteserien Women - Norway", "Damallsvenskan - Sweden", "Frauen-Bundesliga - Germany",
-"WSL - England", "Liga F - Spain", "Serie A Women - Italy", "Premiere Ligue - France", "NWSL - USA",
-"Liga MX Femenil - Mexico", "Brasileirao Feminino - Brazil", "A-League Women - Australia", "WE League - Japan", "WK League - South Korea",
-"Second Division - Egypt", "Botola 2 - Morocco", "Ligue 2 - Algeria", "National League - England", "Regionalliga - Germany",
-"Primera RFEF - Spain", "Serie C - Italy", "Championnat National - France", "Tweede Divisie - Netherlands", "Liga 3 - Portugal",
-"National League - Scotland", "2. Lig - Turkey", "USL Championship - USA", "Liga de Expansion - Mexico", "Serie C - Brazil",
-"Primera B - Argentina", "J3 League - Japan", "K3 League - South Korea", "National Premier League - Australia", "China League One - China",
-"Division 1 - Thai - Thailand", "I-League - India", "Persian Gulf Pro League 2 - Iran", "First Division - UAE", "First Division - Qatar",
-"First Division - Saudi Arabia", "Kenyan Super League - Kenya", "Division One - Ghana", "Ligue 2 - South Africa", "Ligue 2 - Tanzania",
-"National Division - Zambia", "NLO - Nigeria", "NNL - Nigeria", "CAF Champions League - Africa", "CAF Confederation Cup - Africa",
-"Club World Cup - World", "Intercontinental Cup - World", "Olympics Men - World", "Olympics Women - World", "U20 World Cup - World",
-"U17 World Cup - World", "Arab Cup - Arab", "Gulf Cup - Gulf", "COSAFA Cup - Africa", "CECAFA Cup - Africa",
-"WAFU Cup - Africa", "CHAN - Africa", "African Nations League - Africa", "Asian Cup - Asia", "Asian Cup Qualifiers - Asia",
-"Gold Cup - N. America", "Nations League - N. America", "AFC Champions League - Asia", "AFC Cup - Asia", "Europa Conference Qualifiers - Europe",
-"Youth League - Europe", "Premier League U21 - England", "Bundesliga U19 - Germany", "La Liga U19 - Spain", "Primavera 1 - Italy",
-"Reserve League - Russia", "Youth League - Brazil", "Next Gen Cup - India", "Viareggio Cup - Italy", "Toulon Tournament - France",
-"Algarve Cup - Women", "SheBelieves Cup - Women", "Arnold Clark Cup - Women", "Pinatar Cup - Women", "Cyprus Cup - Women"
+const DATA = [
+  { c: "England", f: "gb-eng", l: ["Premier League","Championship","FA Cup","League One"] },
+  { c: "Spain", f: "es", l: ["La Liga","La Liga 2","Copa del Rey"] },
+  { c: "Germany", f: "de", l: ["Bundesliga","2. Bundesliga"] },
+  { c: "Italy", f: "it", l: ["Serie A","Serie B"] },
+  { c: "France", f: "fr", l: ["Ligue 1","Ligue 2"] },
+  { c: "Algeria", f: "dz", l: ["Ligue 1","Ligue 2","Cup"] },
+  { c: "Morocco", f: "ma", l: ["Botola Pro","Botola 2"] },
+  { c: "Egypt", f: "eg", l: ["Premier League","Cup"] },
+  { c: "Nigeria", f: "ng", l: ["NPFL","Cup"] },
+  { c: "South Africa", f: "za", l: ["PSL","Cup"] },
+  { c: "Brazil", f: "br", l: ["Serie A","Serie B"] },
+  { c: "Argentina", f: "ar", l: ["Liga Profesional","Primera Nacional"] },
+  { c: "USA", f: "us", l: ["MLS","US Open Cup"] },
+  { c: "Turkey", f: "tr", l: ["Super Lig","1. Lig"] },
+  { c: "Saudi Arabia", f: "sa", l: ["Pro League","Division 1"] },
+  { c: "Netherlands", f: "nl", l: ["Eredivisie","Eerste Divisie"] },
+  { c: "Portugal", f: "pt", l: ["Primeira Liga","Segunda Liga"] },
+  { c: "Belgium", f: "be", l: ["Pro League","Challenger"] },
+  { c: "Qatar", f: "qa", l: ["Stars League","Second Division"] },
+  { c: "Tunisia", f: "tn", l: ["Ligue 1","Ligue 2"] },
+  { c: "Senegal", f: "sn", l: ["Ligue 1","Ligue 2"] },
+  { c: "Ghana", f: "gh", l: ["Premier League","Division One"] },
+  { c: "Japan", f: "jp", l: ["J1 League","J2 League"] },
+  { c: "Mexico", f: "mx", l: ["Liga MX","Liga Expansion"] },
+];
+
+const MORE = [
+  "Afghanistan-af","Albania-al","Andorra-ad","Angola-ao","Armenia-am","Australia-au",
+  "Austria-at","Azerbaijan-az","Bahrain-bh","Bangladesh-bd","Belarus-by","Benin-bj",
+  "Bolivia-bo","Bosnia-ba","Botswana-bw","Bulgaria-bg","Burkina Faso-bf","Burundi-bi",
+  "Cambodia-kh","Cameroon-cm","Canada-ca","Chad-td","Chile-cl","China-cn","Colombia-co",
+  "Comoros-km","Congo-cg","Costa Rica-cr","Croatia-hr","Cuba-cu","Cyprus-cy","Czech Republic-cz",
+  "Denmark-dk","Djibouti-dj","DR Congo-cd","Ecuador-ec","El Salvador-sv","Estonia-ee",
+  "Ethiopia-et","Finland-fi","Gabon-ga","Gambia-gm","Georgia-ge","Greece-gr","Guinea-gn",
+  "Haiti-ht","Honduras-hn","Hungary-hu","Iceland-is","India-in","Indonesia-id","Iran-ir",
+  "Iraq-iq","Ireland-ie","Israel-il","Ivory Coast-ci","Jamaica-jm","Jordan-jo","Kazakhstan-kz",
+  "Kenya-ke","Kuwait-kw","Latvia-lv","Lebanon-lb","Liberia-lr","Libya-ly","Lithuania-lt",
+  "Luxembourg-lu","Malaysia-my","Mali-ml","Malta-mt","Mauritius-mu","Moldova-md",
+  "Mozambique-mz","Namibia-na","Nepal-np","New Zealand-nz","Niger-ne","Norway-no",
+  "Oman-om","Pakistan-pk","Panama-pa","Paraguay-py","Peru-pe","Philippines-ph","Poland-pl",
+  "Romania-ro","Russia-ru","Rwanda-rw","Scotland-gb-sct","Serbia-rs","Singapore-sg",
+  "Slovakia-sk","Slovenia-si","Somalia-so","South Korea-kr","Sweden-se","Switzerland-ch",
+  "Tanzania-tz","Thailand-th","Togo-tg","Uganda-ug","Ukraine-ua","UAE-ae","Uruguay-uy",
+  "Venezuela-ve","Vietnam-vn","Wales-gb-wls","Zambia-zm","Zimbabwe-zw"
 ];
 
 export default function Page(){
-const [search,setSearch] = useState("");
-const filtered = leagues.filter(l=>l.toLowerCase().includes(search.toLowerCase()));
-return(
-<div className="min-h-screen bg-[#0B0F19] text-white p-4">
-<h1 className="text-2xl font-bold mb-4">200 Leagues</h1>
-<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search leagues..." className="w-full p-3 rounded-lg bg-[#151A27] border border-gray-700 mb-4 text-white" />
-<div className="grid gap-2">
-{filtered.map((name,i)=><Link key={i} href={`/leagues/${i+1}`} className="border border-gray-700 bg-[#151A27] p-3 rounded-lg hover:bg-[#1E2535]">{name}</Link>)}
-</div>
-<p className="text-gray-400 text-sm mt-4 text-center">{filtered.length} leagues</p>
-</div>
-)
+  const [q,setQ] = useState("");
+  const list1 = DATA.filter(x=>x.c.toLowerCase().includes(q.toLowerCase()));
+  const list2 = MORE.map(s=>{
+    const parts = s.split("-");
+    return { c: parts[0], f: parts[1], l: ["Premier League","Cup"] };
+  }).filter(x=>x.c.toLowerCase().includes(q.toLowerCase()));
+
+  const all = [...list1,...list2];
+
+  return(
+    <div style={{background:"#0B0F19",minHeight:"100vh",padding:"12px",color:"white"}}>
+      <h1 style={{fontSize:"20px",fontWeight:"bold",marginBottom:"12px"}}>All {DATA.length + MORE.length} Countries</h1>
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search 150 countries..." style={{width:"100%",padding:"10px",borderRadius:"8px",border:"1px solid #333",background:"#151A27",color:"white",marginBottom:"16px"}} />
+      {all.map(item=>(
+        <div key={item.c} style={{marginBottom:"10px",background:"#151A27",borderRadius:"10px",overflow:"hidden",border:"1px solid #222"}}>
+          <div style={{padding:"10px",background:"#1e2536",display:"flex",gap:"8px",alignItems:"center",fontWeight:"bold",fontSize:"13px"}}>
+            <img src={`https://flagcdn.com/w20/${item.f}.png`} width={20} height={14} alt="" style={{borderRadius:"2px"}} />
+            <span>{item.c.toUpperCase()}</span>
+            <span style={{marginLeft:"auto",background:"#00d084",color:"black",fontSize:"10px",padding:"2px 6px",borderRadius:"10px"}}>{item.l.length} leagues</span>
+          </div>
+          {item.l.map(lg=>(
+            <Link key={lg+item.c} href={`/leagues/${item.f}`} style={{textDecoration:"none"}}>
+              <div style={{padding:"10px",borderTop:"1px solid #222",display:"flex",justifyContent:"space-between",color:"#ccc",fontSize:"13px"}}>
+                <span>{lg}</span><span style={{color:"#666"}}>›</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
 }
