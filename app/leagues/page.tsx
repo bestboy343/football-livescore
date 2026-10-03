@@ -1,151 +1,32 @@
 "use client";
 import { useState } from "react";
 
-const LEAGUES = [
+const ALL = [
 {c:"England",f:"gb-eng",l:["Premier League","Championship","FA Cup"]},
-{c:"Spain",f:"es",l:["La Liga","La Liga 2","Copa del Rey"]},
-{c:"Germany",f:"de",l:["Bundesliga","2. Bundesliga","DFB Pokal"]},
-{c:"Italy",f:"it",l:["Serie A","Serie B","Coppa Italia"]},
-{c:"France",f:"fr",l:["Ligue 1","Ligue 2","Coupe de France"]},
-{c:"Brazil",f:"br",l:["Serie A","Serie B","Copa do Brasil"]},
-{c:"Argentina",f:"ar",l:["Liga Profesional","Copa Argentina"]},
-{c:"Portugal",f:"pt",l:["Primeira Liga","Liga 2"]},
-{c:"Netherlands",f:"nl",l:["Eredivisie","Eerste Divisie"]},
-{c:"Turkey",f:"tr",l:["Super Lig","1. Lig"]},
-{c:"USA",f:"us",l:["MLS","USL Championship"]},
-{c:"Saudi Arabia",f:"sa",l:["Pro League","Kings Cup"]},
-{c:"Mexico",f:"mx",l:["Liga MX"]},
-{c:"Belgium",f:"be",l:["Pro League"]},
-{c:"Morocco",f:"ma",l:["Botola Pro"]},
-{c:"Nigeria",f:"ng",l:["NPFL","Federation Cup"]},
-{c:"Egypt",f:"eg",l:["Premier League"]},
-{c:"South Africa",f:"za",l:["PSL","Nedbank Cup"]},
-{c:"Japan",f:"jp",l:["J1 League","J2 League"]},
-{c:"Qatar",f:"qa",l:["Stars League"]},
-{c:"Scotland",f:"gb-sct",l:["Premiership"]},
-{c:"Switzerland",f:"ch",l:["Super League"]},
-{c:"Austria",f:"at",l:["Bundesliga"]},
-{c:"Russia",f:"ru",l:["Premier League"]},
-{c:"Ukraine",f:"ua",l:["Premier League"]},
-{c:"Greece",f:"gr",l:["Super League"]},
-{c:"Croatia",f:"hr",l:["HNL"]},
-{c:"Serbia",f:"rs",l:["Super Liga"]},
-{c:"Denmark",f:"dk",l:["Superliga"]},
-{c:"Sweden",f:"se",l:["Allsvenskan"]},
-{c:"Norway",f:"no",l:["Eliteserien"]},
-{c:"Poland",f:"pl",l:["Ekstraklasa"]},
-{c:"Czech Republic",f:"cz",l:["First League"]},
-{c:"Romania",f:"ro",l:["SuperLiga"]},
-{c:"Colombia",f:"co",l:["Primera A"]},
-{c:"Chile",f:"cl",l:["Primera Division"]},
-{c:"Uruguay",f:"uy",l:["Primera Division"]},
-{c:"Ecuador",f:"ec",l:["Serie A"]},
-{c:"Senegal",f:"sn",l:["Ligue 1"]},
-{c:"Ghana",f:"gh",l:["Premier League"]},
-{c:"Algeria",f:"dz",l:["Ligue 1"]},
-{c:"Tunisia",f:"tn",l:["Ligue 1"]},
-{c:"Cameroon",f:"cm",l:["Elite One"]},
-{c:"Ivory Coast",f:"ci",l:["Ligue 1"]},
-{c:"Australia",f:"au",l:["A-League"]},
-{c:"South Korea",f:"kr",l:["K League 1"]},
-{c:"China",f:"cn",l:["Super League"]},
-{c:"India",f:"in",l:["ISL","I-League"]},
-{c:"Indonesia",f:"id",l:["Liga 1"]},
-{c:"Thailand",f:"th",l:["League 1"]},
-{c:"Malaysia",f:"my",l:["Super League"]},
-{c:"Vietnam",f:"vn",l:["V.League 1"]},
-{c:"UAE",f:"ae",l:["Pro League"]},
-{c:"Iran",f:"ir",l:["Pro League"]},
-{c:"Iraq",f:"iq",l:["Stars League"]},
-{c:"Israel",f:"il",l:["Premier League"]},
-{c:"Northern Ireland",f:"gb-nir",l:["Premiership"]},
-{c:"Wales",f:"gb-wls",l:["Premier League"]},
-{c:"Ireland",f:"ie",l:["Premier Division"]},
-{c:"Finland",f:"fi",l:["Veikkausliiga"]},
-{c:"Iceland",f:"is",l:["Besta Deild"]},
-{c:"Hungary",f:"hu",l:["NB I"]},
-{c:"Slovakia",f:"sk",l:["Nike Liga"]},
-{c:"Slovenia",f:"si",l:["PrvaLiga"]},
-{c:"Bulgaria",f:"bg",l:["First League"]},
-{c:"Albania",f:"al",l:["Superliga"]},
-{c:"Bosnia",f:"ba",l:["Premier League"]},
-{c:"North Macedonia",f:"mk",l:["First League"]},
-{c:"Montenegro",f:"me",l:["First League"]},
-{c:"Cyprus",f:"cy",l:["First Division"]},
-{c:"Malta",f:"mt",l:["Premier League"]},
-{c:"Luxembourg",f:"lu",l:["National Division"]},
-{c:"Azerbaijan",f:"az",l:["Premier League"]},
-{c:"Georgia",f:"ge",l:["Erovnuli Liga"]},
-{c:"Armenia",f:"am",l:["Premier League"]},
-{c:"Kazakhstan",f:"kz",l:["Premier League"]},
-{c:"Uzbekistan",f:"uz",l:["Super League"]},
-{c:"Paraguay",f:"py",l:["Primera Division"]},
-{c:"Peru",f:"pe",l:["Liga 1"]},
-{c:"Bolivia",f:"bo",l:["Primera Division"]},
-{c:"Venezuela",f:"ve",l:["Primera Division"]},
-{c:"Panama",f:"pa",l:["LPF"]},
-{c:"Costa Rica",f:"cr",l:["Primera Division"]},
-{c:"Honduras",f:"hn",l:["Liga Nacional"]},
-{c:"El Salvador",f:"sv",l:["Primera Division"]},
-{c:"Jamaica",f:"jm",l:["Premier League"]},
-{c:"Canada",f:"ca",l:["Premier League"]},
-{c:"New Zealand",f:"nz",l:["Premiership"]},
-{c:"Kenya",f:"ke",l:["Premier League"]},
-{c:"Uganda",f:"ug",l:["Premier League"]},
-{c:"Tanzania",f:"tz",l:["Premier League"]},
-{c:"Zambia",f:"zm",l:["Super League"]},
-{c:"Zimbabwe",f:"zw",l:["Premier League"]},
-{c:"Angola",f:"ao",l:["Girabola"]},
-{c:"DR Congo",f:"cd",l:["Linafoot"]},
-{c:"Mali",f:"ml",l:["Premiere Division"]},
-{c:"Burkina Faso",f:"bf",l:["Premier League"]},
-{c:"Guinea",f:"gn",l:["Ligue 1"]},
-{c:"Benin",f:"bj",l:["Premier League"]},
-{c:"Togo",f:"tg",l:["Championnat"]},
-{c:"Rwanda",f:"rw",l:["Premier League"]},
-{c:"Mozambique",f:"mz",l:["Mocambola"]},
-{c:"Botswana",f:"bw",l:["Premier League"]},
-{c:"Namibia",f:"na",l:["Premier League"]},
-{c:"Libya",f:"ly",l:["Premier League"]},
-{c:"Sudan",f:"sd",l:["Premier League"]},
-{c:"Ethiopia",f:"et",l:["Premier League"]},
-{c:"Gabon",f:"ga",l:["Championnat"]},
-{c:"Singapore",f:"sg",l:["Premier League"]},
-{c:"Philippines",f:"ph",l:["PFL"]},
-{c:"Bahrain",f:"bh",l:["Premier League"]},
-{c:"Kuwait",f:"kw",l:["Premier League"]},
-{c:"Oman",f:"om",l:["Pro League"]},
-{c:"Jordan",f:"jo",l:["Pro League"]},
-{c:"Lebanon",f:"lb",l:["Premier League"]},
-{c:"Latvia",f:"lv",l:["Virsliga"]},
-{c:"Lithuania",f:"lt",l:["A Lyga"]},
-{c:"Estonia",f:"ee",l:["Meistriliiga"]},
-{c:"Moldova",f:"md",l:["Super Liga"]},
-{c:"Belarus",f:"by",l:["Premier League"]},
-{c:"Gibraltar",f:"gi",l:["Football League"]},
-{c:"Andorra",f:"ad",l:["Primera Divisio"]},
-{c:"Trinidad",f:"tt",l:["Pro League"]},
+{c:"Spain",f:"es",l:["La Liga"]},
+{c:"Germany",f:"de",l:["Bundesliga"]},
+{c:"Italy",f:"it",l:["Serie A"]},
+{c:"France",f:"fr",l:["Ligue 1"]},
+{c:"Brazil",f:"br",l:["Serie A"]},
+{c:"Nigeria",f:"ng",l:["NPFL"]},
 ];
 
-export default function Page(){
+export default function Home(){
  const [q,setQ]=useState("");
- const filtered = LEAGUES.filter(x=>x.c.toLowerCase().includes(q.toLowerCase()));
+ const filtered = ALL.filter(x=>x.c.toLowerCase().includes(q.toLowerCase()));
  return(
-  <div style={{background:"#0B0F19",minHeight:"100vh",padding:12,color:"white"}}>
-   <h1 style={{fontWeight:"bold",fontSize:18}}>TOP {LEAGUES.length} LEAGUES 👑</h1>
-   <p style={{fontSize:11,color:"#888",marginBottom:12}}>Top first • {LEAGUES.length} countries • Fixed!</p>
-   <input value={q} onChange={e=>setQ(e.target.value)} placeholder={`Search ${LEAGUES.length}...`} style={{width:"100%",padding:10,borderRadius:8,background:"#151A27",border:"1px solid #333",color:"white",marginBottom:12}} />
+  <div style={{background:"#080F19",minHeight:"100vh",padding:12,color:"white"}}>
+   <h1 style={{fontSize:20,fontWeight:"bold"}}>LiveScore ⚽</h1>
+   <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search..." style={{width:"100%",padding:10,borderRadius:8,background:"#151A27",border:"1px solid #333",color:"white",margin:"12px 0"}} />
    {filtered.map((o,i)=>(
-    <div key={o.c} style={{background:"#151A27",marginBottom:8,borderRadius:10,overflow:"hidden",border: i<15? "1px solid #00d084" : "1px solid #222"}}>
-     <div style={{padding:10,background: i<15? "#1a2e25" : "#1e2536",display:"flex",gap:8,alignItems:"center",fontWeight:"bold",fontSize:13}}>
-      <span style={{fontSize:10,color: i<15? "#00d084" : "#555",width:22}}>{i+1}</span>
-      <img src={`https://flagcdn.com/w20/${o.f}.png`} width={20} height={14} alt="" style={{borderRadius:2}} />
-      {o.c.toUpperCase()}
-      {i<15 && <span style={{marginLeft:"auto",background:"#00d084",color:"#000",fontSize:9,padding:"2px 6px",borderRadius:10}}>TOP</span>}
-     </div>
-     {o.l.map(l=><div key={l} style={{padding:"8px 12px",borderTop:"1px solid #222",fontSize:13,color:"#ccc"}}>• {l}</div>)}
+    <div key={o.c} style={{background:"#151A27",padding:10,marginBottom:8,borderRadius:8,display:"flex",gap:8,alignItems:"center"}}>
+     <span style={{color:"#666",fontSize:12,width:20}}>{i+1}</span>
+     <img src={`https://flagcdn.com/w20/${o.f}.png`} width={20} height={14} alt="" />
+     <span style={{fontWeight:"bold",fontSize:13}}>{o.c}</span>
+     <span style={{marginLeft:"auto",fontSize:11,color:"#888"}}>{o.l[0]}</span>
     </div>
    ))}
+   <a href="/leagues" style={{display:"block",marginTop:16,textAlign:"center",background:"#00d084",color:"#000",padding:12,borderRadius:8,fontWeight:"bold"}}>View All 120 Leagues →</a>
   </div>
  );
 }
