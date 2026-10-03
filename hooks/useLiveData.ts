@@ -1,6 +1,35 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { footballService, Match } from '@/services/apiService';
+
+export const footballService = {
+  getTodayMatches: async () => {
+    try {
+      const res = await fetch('/api/matches?type=today');
+      if (!res.ok) return [];
+      return await res.json();
+    } catch { return []; }
+  },
+  getLiveMatches: async () => {
+    try {
+      const res = await fetch('/api/matches?type=live');
+      if (!res.ok) return [];
+      return await res.json();
+    } catch { return []; }
+  },
+  getMatchById: async () => null,
+};
+
+export type Match = {
+  id: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  status: string;
+  minute?: string;
+  time: string;
+  league: string;
+};
 
 export function useTodayMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -42,6 +71,3 @@ export function getSingleTeam() { return null; }
 export function getSingleLeague() { return null; }
 export function nextMatch() { return null; }
 export function nextSingle() { return null; }
-
-export { footballService } from '@/services/apiService';
-export type { Match } from '@/services/apiService';
