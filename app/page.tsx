@@ -1,9 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 
+type Match = any;
+
 export default function Page() {
   const [time, setTime] = useState("");
   const [open, setOpen] = useState<string | null>("Premier League");
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setTime(new Date().toLocaleTimeString());
@@ -11,54 +15,82 @@ export default function Page() {
     return () => clearInterval(i);
   }, []);
 
-  const data: any = {
-    "Premier League": [
-      { home:"Man City", away:"Arsenal", h:2, a:1, min:"78'", events:[{m:23,t:"⚽ Haaland"},{m:45,t:"🟨 Saka"}] },
-      { home:"Chelsea", away:"Liverpool", h:0, a:0, min:"15'", events:[] },
-      { home:"Man Utd", away:"Tottenham", h:1, a:1, min:"HT", events:[{m:12,t:"⚽ Son"}] },
-    ],
-    "La Liga": [
-      { home:"Real Madrid", away:"Barcelona", h:1, a:1, min:"45'", events:[] },
-      { home:"Atletico", away:"Sevilla", h:2, a:0, min:"62'", events:[] },
-    ],
-    "Bundesliga": [{ home:"Bayern", away:"Dortmund", h:3, a:2, min:"89'", events:[{m:90,t:"⚽ Kane"}] }],
-    "Serie A": [{ home:"Inter", away:"AC Milan", h:0, a:0, min:"22'", events:[] },{ home:"Juventus", away:"Napoli", h:1, a:0, min:"55'", events:[] }],
-    "Ligue 1": [{ home:"PSG", away:"Marseille", h:2, a:2, min:"90+3'", events:[] }],
-  };
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const r = await fetch('/api/live', { cache: 'no-store' });
+        const d = await r.json();
+        if (Array.isArray(d) && d.length > 0) {
+          setMatches(d);
+        } else if (Array.isArray(d) && d.length === 0) {
+          setMatches([]);
+        }
+      } catch {}
+      setLoading(false);
+    };
+    load();
+    const int = setInterval(load, 30000);
+    return () => clearInterval(int);
+  }, []);
 
   const leagues = [
-    { name: "Premier League", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿" }, { name:"La Liga", flag:"🇪🇸" },
-    { name:"Bundesliga", flag:"🇩🇪" }, { name:"Serie A", flag:"🇮🇹" }, { name:"Ligue 1", flag:"🇫🇷" },
+    { name: "Premier League", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+    { name: "La Liga", flag: "🇪🇸" },
+    { name: "Bundesliga", flag: "🇩🇪" },
+    { name: "Serie A", flag: "🇮🇹" },
+    { name: "Ligue 1", flag: "🇫🇷" },
   ];
 
+  // Group matches by league
+  const grouped: any = {};
+  matches.forEach((m: any) => {
+    if (!grouped[m.league]) grouped[m.league] = [];
+    grouped[m.league].push(m);
+  });
+
+  // Demo fallback if API empty
+  const demo = [
+    { league: "Premier League", home: "Man City", away: "Arsenal", score: "2 - 1", minute: "78'", homeLogo:"", awayLogo:"", events:["23' Haaland"] },
+    { league: "Premier League", home: "Chelsea", away: "Liverpool", score: "1 - 1", minute: "HT", homeLogo:"", awayLogo:"", events:[] },
+  ];
+  const displayData = matches.length > 0 ? grouped : { "Premier League": demo };
+
   return (
-    <div style={{ background:"#0a0a0a", minHeight:"100vh", color:"white", padding:12, fontFamily:"sans-serif" }}>
-      <h1 style={{ textAlign:"center", color:"#00ff88", margin:0 }}>⚽ FOOTBALLLIVE</h1>
-      <p style={{ textAlign:"center", fontSize:11, opacity:0.5 }}>Vercel Fast ⚡ | {time} | Auto 30s | ANWP Features</p>
+    <div style={{ background: "#0a0a0a", minHeight: "100vh", color: "white", padding: 12, fontFamily: "system-ui" }}>
+      <h1 style={{ textAlign: "center", color: "#00FF88", margin: 0 }}>⚽ FOOTBALLLIVE</h1>
+      <p style={{ textAlign: "center", fontSize: 11, opacity: 0.5 }}>Vercel Fast ⚡ | {time} | Auto 30s | {matches.length > 0 ? `${matches.length} REAL MATCHES` : loading ? "Loading real..." : "Demo Mode"}</p>
 
-      {leagues.map(l=>(
-        <div key={l.name} style={{ background:"#171717", border:"1px solid #222", borderRadius:12, marginTop:12, overflow:"hidden" }}>
-          <div onClick={()=> setOpen(open===l.name? null : l.name)} style={{ padding:14, display:"flex", justifyContent:"space-between", cursor:"pointer" }}>
-            <span><b>{l.flag} {l.name}</b> <span style={{fontSize:11, opacity:0.5}}> {data[l.name].length} matches</span></span>
-            <span style={{ background:"#00ff88", color:"black", fontSize:11, fontWeight:"bold", padding:"3px 8px", borderRadius:6 }}>{data[l.name].length} LIVE</span>
-          </div>
-
-          {open===l.name && data[l.name].map((m:any,i:number)=>(
-            <div key={i} style={{ borderTop:"1px solid #222", padding:10, background:"#101010" }}>
-              <div style={{ display:"flex", justifyContent:"space-between", fontSize:14 }}>
-                <span>{m.home}</span>
-                <span style={{ background:"#222", padding:"2px 8px", borderRadius:6, color:"#00ff88", fontWeight:"bold" }}>{m.h} - {m.a} <span style={{ fontSize:10, opacity:0.7 }}>{m.min}</span></span>
-                <span>{m.away}</span>
-              </div>
-              {m.events.length>0 && (
-                <div style={{ marginTop:6, fontSize:11, opacity:0.7 }}>
-                  {m.events.map((e:any,j:number)=>(<div key={j}> {e.m}' {e.t} </div>))}
-                </div>
-              )}
+      {leagues.map(l => {
+        const list = displayData[l.name] || [];
+        if(list.length===0) return null;
+        return (
+          <div key={l.name} style={{ background: "#171717", border: "1px solid #222", borderRadius: 12, marginTop: 12 }}>
+            <div onClick={() => setOpen(open===l.name? null : l.name)} style={{ padding: 14, display: "flex", justifyContent: "space-between", cursor:"pointer" }}>
+              <span><b>{l.flag} {l.name}</b> <span style={{ fontSize: 11, opacity: 0.5 }}>({list.length})</span></span>
+              <span style={{ background: "#00FF88", color: "black", fontSize: 11, fontWeight: "bold", padding:"2px 8px", borderRadius: 8 }}>{open===l.name? "−":"+"}</span>
             </div>
-          ))}
-        </div>
-      ))}
+            {open===l.name && (
+              <div style={{ borderTop: "1px solid #222", padding: 10, background: "#101010" }}>
+                {list.map((m: any) => (
+                  <div key={m.id || m.home+m.away} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, padding:"10px 0", borderBottom:"1px solid #1a1a1a" }}>
+                    <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      {m.homeLogo && <img src={m.homeLogo} width={18} height={18} style={{ borderRadius: 9 }} />}
+                      {m.home}
+                    </span>
+                    <span style={{ background: "#222", padding: "2px 8px", borderRadius: 8, color: "#00FF88", fontWeight: "bold", fontSize: 12 }}>{m.score || `${m.goals?.home??0}-${m.goals?.away??0}` } <span style={{ color: "#aaa", fontSize: 10 }}>{m.minute}</span></span>
+                    <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      {m.away}
+                      {m.awayLogo && <img src={m.awayLogo} width={18} height={18} style={{ borderRadius: 9 }} />}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
+
+      <p style={{ textAlign: "center", fontSize: 10, opacity: 0.3, marginTop: 20 }}>API: api-sports.io | Updates every 30s</p>
     </div>
   );
 }
