@@ -1,59 +1,37 @@
-"use client";
-import { useState, useEffect } from "react";
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
-export default function Page() {
-  const [matches,setMatches] = useState<any[]>([]);
-  const [loading,setLoading] = useState(true);
+export default function Home() {
+  const [games, setGames] = useState<any[]>([]);
 
   useEffect(() => {
-    async function load(){
-      setLoading(true);
-      try{
-        const res = await fetch(`/api/live`, { cache: 'no-store' });
-        const data = await res.json();
-        const real = Array.isArray(data)? data : (data.matches || []);
-        setMatches(real);
-      }catch{ setMatches([]); }
-      setLoading(false);
-    }
-    load();
-    const id = setInterval(load, 30000); // auto-refresh every 30s
-    return ()=> clearInterval(id);
+    fetch('/api/live')
+      .then(r => r.json())
+      .then(d => setGames(Array.isArray(d) ? d : []));
   }, []);
 
-  // GROUP by league - so Argentina: Primera Nacional = 1 header only
-  const grouped: any = {};
-  matches.forEach((m:any)=>{
-    const key = `${m.country}::${m.league}`;
-    if(!grouped[key]) grouped[key] = { country:m.country, league:m.league, flag:m.flag, games:[] };
-    grouped[key].games.push(m);
-  });
-
   return (
-    <div style={{background:'#111', minHeight:'100vh', color:'white', fontFamily:'Arial'}}>
-      <div style={{background:'#000', padding:'10px', fontWeight:'bold', fontSize:'16px'}}>FOOTBALL LIVE</div>
-      <div style={{background:'#00b050', padding:'6px 10px', fontWeight:'bold', fontSize:'13px'}}>Football » Today » LIVE - {matches.length} games</div>
+    <div style={{background:'#111', color:'white', minHeight:'100vh'}}>
+      <div style={{display:'flex', justifyContent:'space-between', padding:'16px', background:'#000'}}>
+        <h1>FOOTBALL LIVE</h1>
+        <Link href="/" style={{background:'#16a34a', padding:'8px 16px', borderRadius:'8px', color:'white', textDecoration:'none'}}>Home</Link>
+      </div>
 
-      {loading? <div style={{padding:'30px', textAlign:'center'}}>Loading LIVE...</div> :
-       Object.keys(grouped).length===0? <div style={{padding:'30px', textAlign:'center'}}>No LIVE matches now</div> :
-       Object.values(grouped).map((g:any, gi:number)=>(
-         <div key={gi}>
-           <div style={{background:'#000', padding:'7px 10px', fontSize:'13px', fontWeight:'bold', display:'flex', alignItems:'center', gap:'8px', borderTop:'1px solid #222'}}>
-             {g.flag? <img src={g.flag} alt="" style={{width:'20px', height:'14px', objectFit:'cover', borderRadius:'2px'}} /> : <span>🌍</span>}
-             <span>{g.country}: {g.league} ({g.games.length})</span>
-           </div>
-           {g.games.map((m:any,i:number)=>(
-             <div key={i} style={{display:'flex', justifyContent:'space-between', padding:'8px 10px', background:'#1c1c1c', borderBottom:'1px solid #2a2a2a'}}>
-               <div>
-                 <div style={{color:'#00ff00', fontSize:'11px', fontWeight:'bold'}}>{m.minute}</div>
-                 <div style={{fontSize:'14px', lineHeight:'1.4'}}>{m.home}<br/>{m.away}</div>
-               </div>
-               <div style={{background:'#d00', padding:'6px 12px', borderRadius:'4px', fontWeight:'bold', height:'fit-content', alignSelf:'center', minWidth:'35px', textAlign:'center'}}>{m.score}</div>
-             </div>
-           ))}
-         </div>
-       ))
-      }
+      <div style={{padding:'10px'}}>Football » Today » LIVE - {games.length} games</div>
+
+      {games.map((m:any, i:number) => (
+        <Link key={i} href={`/match/${m.id || i}`} style={{display:'block', textDecoration:'none', color:'white'}}>
+          <div style={{padding:'12px', borderBottom:'1px solid #333', position:'relative'}}>
+            <div style={{color:'#0f0', fontSize:'14px', fontWeight:'bold'}}>{m.minute}</div>
+            <div style={{marginTop:'4px'}}>{m.home}</div>
+            <div style={{opacity:0.8}}>{m.away}</div>
+            <div style={{position:'absolute', right:'12px', top:'20px', background:'#dc2626', padding:'6px 14px', borderRadius:'6px', fontWeight:'bold'}}>
+              {m.score}
+            </div>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
