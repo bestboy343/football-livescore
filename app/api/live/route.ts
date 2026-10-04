@@ -1,22 +1,42 @@
 export const dynamic = 'force-dynamic';
+
+let cache: any = null;
+let lastFetch = 0;
+
 export async function GET() {
+  // Cache 90 sec so your 100/day no finish
+  if (cache && Date.now() - lastFetch < 90000) {
+    return Response.json(cache);
+  }
+
   try {
-    const key = process.env.API_FOOTBALL_KEY;
-    const res = await fetch('https://v3.football.api-sports.io/fixtures?live=all', {
-      headers: { 'x-apisports-key': key!, 'x-rapidapi-key': key! },
+    const res = await fetch('https://soccer.highlightly.net/matches?live=true', {
+      headers: {
+        'x-api-key': process.env.HIGHLIGHTLY_KEY!,
+        'x-rapidapi-key': process.env.HIGHLIGHTLY_KEY!,
+      },
       cache: 'no-store'
     });
-    const data = await res.json();
-    const matches = (data.response || []).map((f: any) => ({
-      id: f.fixture.id,
-      country: f.league.country,
-      flag: f.league.flag,
-      league: f.league.name,
-      home: f.teams.home.name,
-      away: f.teams.away.name,
-      score: `${f.goals.home?? 0}-${f.goals.away?? 0}`,
-      minute: f.fixture.status.elapsed? `${f.fixture.status.elapsed}'` : f.fixture.status.short,
-    }));
-    return Response.json(matches);
-  } catch { return Response.json([]); }
+
+    const json = await res.json();
+    const raw = json.data || json.matches || json || [];
+
+    const formatted = raw.map((m:any) => ({
+      country: m.country?.name || m.league?.country || 'World',
+      flag: m.country?.flag || m.country?.logo || null,
+      league: m.league?.name || 'Live',
+      home: m.homeTeam?.name || m.home?.name || m.teams?.home?.name,
+      away: m.awayTeam?.name || m.away?.name || m.teams?.away?.name,
+      score: `${m.homeTeam?.score ?? m.score?.home ?? 0}-${m.awayTeam?.score ?? m.score?.away ?? 0}`,
+      minute: m.minute ? `${m.minute}'` : (m.status?.short || m.status || 'LIVE'),
+    })).filter((x:any)=> x.home && x.away);
+
+    cache = formatted;
+    lastFetch = Date.now();
+    return Response.json(formatted);
+
+  } catch (err) {
+    console.log(err);
+    return Response.json(cache || []);
+  }
 }
