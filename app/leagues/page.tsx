@@ -1,27 +1,29 @@
 "use client"
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
-const All = [
- ["England","gb-eng"],
- ["Spain","es"],
- ["Germany","de"],
- ["Italy","it"],
- ["France","fr"],
- ["Nigeria","ng"],
-]
-
-export default function Page(){
+export default function LeaguePage(){
+ const params = useParams()
+ const code = params.countryCode as string
  const router = useRouter()
- const [q,setQ] = useState("")
- const f = All.filter(c=>c[0].toLowerCase().includes(q.toLowerCase()))
+
+ const games = [
+  {home:"Man City", away:"Arsenal", time:"19:30", score:"2 - 1"},
+  {home:"Liverpool", away:"Chelsea", time:"21:00", score:"0 - 0"},
+  {home:"Tottenham", away:"Man Utd", time:"Live 67'", score:"1 - 2"},
+ ]
+
  return(
   <div style={{background:'#000',minHeight:'100vh',color:'#fff',padding:16}}>
-   <h1>All Leagues</h1>
-   <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search" style={{width:'100%',padding:10,background:'#222',color:'#fff'}}/>
-   <div style={{marginTop:12,display:'grid',gap:8}}>
-    {f.map((c,i)=><div key={i} onClick={()=>router.push(`/leagues/${c[1]}`)} style={{background:'#1a1a1a',padding:12,borderRadius:8,border:'1px solid #333'}}>{c[0]} - {c[1]}</div>)}
+   <div onClick={()=>router.back()} style={{cursor:'pointer',marginBottom:12}}>← Back</div>
+   <h2 style={{textTransform:'uppercase'}}>{code} Leagues</h2>
+   <p style={{opacity:0.6,fontSize:13}}>Live matches from {code}</p>
+   <div style={{marginTop:16,display:'grid',gap:10}}>
+    {games.map((g,i)=><div key={i} onClick={()=>router.push(`/match/${i+1}`)} style={{background:'#1a1a1a',padding:14,borderRadius:10,border:'1px solid #333',display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer'}}>
+     <div><div style={{fontSize:13,opacity:0.7}}>{g.time}</div><div>{g.home} vs {g.away}</div></div>
+     <div style={{background:'#00ff88',color:'#000',padding:'4px 8px',borderRadius:6,fontWeight:'bold'}}>{g.score}</div>
+    </div>)}
    </div>
+   <div style={{marginTop:20,textAlign:'center',opacity:0.5,fontSize:12}}>Ads will show here</div>
   </div>
  )
 }
