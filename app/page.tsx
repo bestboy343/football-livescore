@@ -61,7 +61,7 @@ export default function Home() {
             {list.map((m: any, i: number) => (
               <button
                 key={m.id || i}
-                onClick={() => window.location.href = `/match/${m.id || i}`}
+                onClick={() => window.location.href = `/matches/${m.id || i}`}
                 style={{
                   display:'flex',
                   justifyContent:'space-between',
