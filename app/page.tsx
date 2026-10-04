@@ -17,38 +17,38 @@ export default function Page() {
       setLoading(false);
     }
     load();
+    const id = setInterval(load, 30000); // auto-refresh every 30s
+    return ()=> clearInterval(id);
   }, []);
 
-  // GROUP BY LEAGUE
+  // GROUP by league - so Argentina: Primera Nacional = 1 header only
   const grouped: any = {};
   matches.forEach((m:any)=>{
-    const key = `${m.country}|${m.league}|${m.flag}`;
+    const key = `${m.country}::${m.league}`;
     if(!grouped[key]) grouped[key] = { country:m.country, league:m.league, flag:m.flag, games:[] };
     grouped[key].games.push(m);
   });
 
   return (
     <div style={{background:'#111', minHeight:'100vh', color:'white', fontFamily:'Arial'}}>
-      <div style={{background:'#000', padding:'10px', fontWeight:'bold'}}>FOOTBALL LIVE</div>
-      <div style={{background:'#00b050', padding:'6px 10px', fontWeight:'bold', fontSize:'14px'}}>Football » Today » LIVE</div>
+      <div style={{background:'#000', padding:'10px', fontWeight:'bold', fontSize:'16px'}}>FOOTBALL LIVE</div>
+      <div style={{background:'#00b050', padding:'6px 10px', fontWeight:'bold', fontSize:'13px'}}>Football » Today » LIVE - {matches.length} games</div>
 
-      {loading? <div style={{padding:'20px', textAlign:'center'}}>Loading...</div> :
-       Object.keys(grouped).length===0? <div style={{padding:'20px', textAlign:'center'}}>No LIVE now</div> :
+      {loading? <div style={{padding:'30px', textAlign:'center'}}>Loading LIVE...</div> :
+       Object.keys(grouped).length===0? <div style={{padding:'30px', textAlign:'center'}}>No LIVE matches now</div> :
        Object.values(grouped).map((g:any, gi:number)=>(
-         <div key={gi} style={{marginBottom:'4px'}}>
-           {/* LEAGUE HEADER - ONCE */}
-           <div style={{background:'#000', padding:'8px 10px', fontSize:'13px', fontWeight:'bold', display:'flex', alignItems:'center', gap:'8px', borderTop:'1px solid #333'}}>
-             {g.flag && <img src={g.flag} alt="" style={{width:'22px', height:'15px', objectFit:'cover', borderRadius:'2px'}} />}
-             <span>{g.country}: {g.league}</span>
+         <div key={gi}>
+           <div style={{background:'#000', padding:'7px 10px', fontSize:'13px', fontWeight:'bold', display:'flex', alignItems:'center', gap:'8px', borderTop:'1px solid #222'}}>
+             {g.flag? <img src={g.flag} alt="" style={{width:'20px', height:'14px', objectFit:'cover', borderRadius:'2px'}} /> : <span>🌍</span>}
+             <span>{g.country}: {g.league} ({g.games.length})</span>
            </div>
-           {/* ALL GAMES UNDER SAME LEAGUE */}
            {g.games.map((m:any,i:number)=>(
-             <div key={i} style={{display:'flex', justifyContent:'space-between', padding:'8px 10px', background:'#1a1a1a', borderBottom:'1px solid #222'}}>
+             <div key={i} style={{display:'flex', justifyContent:'space-between', padding:'8px 10px', background:'#1c1c1c', borderBottom:'1px solid #2a2a2a'}}>
                <div>
-                 <div style={{color:'#00ff00', fontSize:'11px'}}>{m.minute||m.status} </div>
-                 <div style={{fontSize:'14px', lineHeight:'1.3'}}>{m.home}<br/>{m.away}</div>
+                 <div style={{color:'#00ff00', fontSize:'11px', fontWeight:'bold'}}>{m.minute}</div>
+                 <div style={{fontSize:'14px', lineHeight:'1.4'}}>{m.home}<br/>{m.away}</div>
                </div>
-               <div style={{background:'#d00', padding:'6px 12px', borderRadius:'4px', fontWeight:'bold', height:'fit-content', alignSelf:'center'}}>{m.score}</div>
+               <div style={{background:'#d00', padding:'6px 12px', borderRadius:'4px', fontWeight:'bold', height:'fit-content', alignSelf:'center', minWidth:'35px', textAlign:'center'}}>{m.score}</div>
              </div>
            ))}
          </div>
