@@ -1,40 +1,48 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+type Match = {
+  id: string;
+  league: string;
+  homeTeam: string;
+  awayTeam: string;
+  score: { home: number; away: number; display: string };
+  status: string;
+  minute: string;
+  isLive: boolean;
+};
+
 export default function Page() {
-  const [matches, setMatches] = useState<any[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const r = await fetch('/api/live');
-        const d = await r.json();
-        setMatches(d.matches || []);
-      } catch {}
-      setLoading(false);
-    };
-    load();
-    const t = setInterval(load, 30000);
-    return () => clearInterval(t);
+    fetch(`/api/live?t=${Date.now()}`, { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => {
+        setMatches(Array.isArray(d) ? d : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
+  const liveCount = matches.filter(m => m.isLive).length;
+
+  if (loading) return <div style={{padding:20,background:'black',color:'white',minHeight:'100vh'}}>Loading live scores...</div>;
+
   return (
-    <div style={{background:'#0a0a0a', color:'white', minHeight:'100vh', padding:'12px'}}>
-      <h1 style={{fontSize:'20px', fontWeight:'bold', marginBottom:'12px'}}>
-        FOOTBALL LIVE - {matches.length} LIVE
-      </h1>
-      {loading && <p>Loading...</p>}
-      {matches.map((m:any)=>(
-        <div key={m.id} style={{background:'#1a1a1a', padding:'12px', borderRadius:'12px', marginBottom:'8px', display:'flex', justifyContent:'space-between'}}>
-          <div>
-            <div style={{fontWeight:'bold'}}>{m.home} vs {m.away}</div>
-            <div style={{fontSize:'11px', color:'#aaa'}}>{m.country} - {m.league} - {m.status}</div>
+    <div style={{background:'#000',color:'#fff',minHeight:'100vh',padding:20,fontFamily:'sans-serif'}}>
+      <h1 style={{fontSize:26,fontWeight:'bold'}}>FOOTBALL LIVE - {liveCount} LIVE</h1>
+      <p style={{color:'#888',fontSize:13}}>Auto-updating • {new Date().toLocaleTimeString()}</p>
+      {matches.map(m => (
+        <div key={m.id} style={{border:'1px solid #222',marginTop:14,padding:15,borderRadius:12,background:'#0f0f0f'}}>
+          <div style={{fontSize:11,color:'#888'}}>{m.league} • {m.status} {m.minute}</div>
+          <div style={{fontSize:18,fontWeight:700,marginTop:6}}>
+            {m.homeTeam} <span style={{color:'#00ff88',margin:'0 8px'}}>{m.score.display}</span> {m.awayTeam}
           </div>
-          <div style={{fontWeight:'bold'}}>{m.score?.home ?? 0}-{m.score?.away ?? 0}</div>
+          {m.isLive && <div style={{marginTop:6,color:'#ff3333',fontSize:12,fontWeight:'bold'}}>● LIVE</div>}
         </div>
       ))}
-      {!loading && matches.length===0 && <p>No live games</p>}
     </div>
   );
 }
