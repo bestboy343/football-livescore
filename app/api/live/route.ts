@@ -1,61 +1,78 @@
 import { NextResponse } from "next/server";
-export const dynamic = "force-dynamic";
 
-const FALLBACK = [
-  { id: "1", league: "Premier League", homeTeam: "Arsenal", awayTeam: "Man City", score: { home: 2, away: 2, display: "2 - 2" }, status: "LIVE", time: "78'" },
-  { id: "2", league: "La Liga", homeTeam: "Real Madrid", awayTeam: "Barcelona", score: { home: 1, away: 0, display: "1 - 0" }, status: "LIVE", time: "54'" },
-];
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET() {
+  const key = process.env.HIGHLIGHTIFY_KEY || process.env.HIGHLIGHTLY_KEY || "";
+
+  const safeFetch = async (url: string) => {
+    try {
+      const r = await fetch(url, {
+        headers: { "x-rapidapi-key": key } as any,
+        cache: "no-store",
+      });
+      if (!r.ok) {
+        console.log(`API ${r.status} for ${url}`);
+        return [];
+      }
+      const j = await r.json();
+      return j.data || j.matches || j.response || j || [];
+    } catch (e: any) {
+      console.log(`Fetch failed ${url}: ${e.message}`);
+      return [];
+    }
+  };
+
   try {
-    const key = process.env.HIGHLIGHTIFY_KEY || process.env.HIGHLIGHTLY_KEY || "";
-    if (!key) return NextResponse.json(FALLBACK);
+    if (!key) {
+      console.log("NO KEY SET");
+      return NextResponse.json([]);
+    }
 
-    const headers = { "x-rapidapi-key": key, "x-api-key": key } as any;
+    let list = await safeFetch("https://sports.highlightly.net/football/matches?live=all");
 
-    // LIVE first
-    let url = "https://sports.highlightly.net/football/matches?live=all";
-    let r = await fetch(url, { headers, cache: "no-store" });
-    let j = await r.json().catch(() => ({}));
-    let list = j.data || j.matches || j.response || j || [];
-
-    // If no live, TODAY
-    if (!Array.isArray(list) || list.length === 0) {
+    if (!list || list.length === 0) {
       const today = new Date().toISOString().split("T")[0];
-      url = `https://sports.highlightly.net/football/matches?date=${today}`;
-      r = await fetch(url, { headers, cache: "no-store" });
-      j = await r.json().catch(() => ({}));
-      list = j.data || j.matches || j.response || [];
+      list = await safeFetch(`https://sports.highlightly.net/football/matches?date=${today}`);
     }
 
-    // If still empty, try api.highlightly.net as backup
-    if (!Array.isArray(list) || list.length === 0) {
-      r = await fetch("https://api.highlightly.net/football/matches/live", { headers, cache: "no-store" });
-      j = await r.json().catch(() => ({}));
-      list = j.data || j.matches || j.response || [];
-    }
+    if (!Array.isArray(list)) list = [];
 
-    if (!Array.isArray(list) || list.length === 0) {
-      return NextResponse.json(FALLBACK);
-    }
+    // Sort big leagues first
+    const priority: any = {
+      "Premier League": 1, "La Liga": 2, "Serie A": 3, "Bundesliga": 4, "Ligue 1": 5,
+      "Champions League": 6, "Europa": 7, "Primeira": 8, "Eredivisie": 9, "Championship": 10
+    };
+    const getPrio = (n: string) => {
+      for (const k in priority) if (n.includes(k)) return priority[k];
+      return 99;
+    };
 
-    const out = list.slice(0, 30).map((m: any, i: number) => ({
+    list.sort((a: any, b: any) => {
+      const la = a.league?.name || a.league || "";
+      const lb = b.league?.name || b.league || "";
+      return getPrio(la) - getPrio(lb);
+    });
+
+    const out = list.slice(0, 40).map((m: any, i: number) => ({
       id: m.id || String(i),
       league: m.league?.name || m.league || "Football",
-      homeTeam: m.homeTeam?.name || m.home_team?.name || m.teams?.home?.name || m.home || "Home",
-      awayTeam: m.awayTeam?.name || m.away_team?.name || m.teams?.away?.name || m.away || "Away",
+      homeTeam: m.homeTeam?.name || m.home_team?.name || m.teams?.home?.name || "Home",
+      awayTeam: m.awayTeam?.name || m.away_team?.name || m.teams?.away?.name || "Away",
       score: {
         home: m.score?.home?? m.home_score?? m.goals?.home?? 0,
         away: m.score?.away?? m.away_score?? m.goals?.away?? 0,
-        display: m.score?.display || `${m.goals?.home?? 0} - ${m.goals?.away?? 0}`,
+        display: `${m.goals?.home?? m.home_score?? 0} - ${m.goals?.away?? m.away_score?? 0}`,
       },
       status: m.status || (m.isLive? "LIVE" : "SCHEDULED"),
       time: m.minute? `${m.minute}'` : m.time || "",
     }));
 
-    return NextResponse.json(out);
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json(FALLBACK);
+    return NextResponse.json(out, { headers: { "Cache-Control": "no-store" } });
+
+  } catch (e: any) {
+    console.log("FATAL ERROR", e.message);
+    return NextResponse.json([]);
   }
 }
