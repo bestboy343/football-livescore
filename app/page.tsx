@@ -1,39 +1,76 @@
-import { NextResponse } from "next/server";
-export const dynamic = "force-dynamic";
-export async function GET() {
-  const key = process.env.HIGHLIGHTIFY_KEY || process.env.HIGHLIGHTLY_KEY || "";
-  if (!key) return NextResponse.json([]);
-  const today = new Date().toISOString().split("T")[0];
-  let list: any[] = [];
-  for (const offset of [0, 40, 80]) {
-    try {
-      const r = await fetch(`https://soccer.highlightly.net/matches?date=${today}&limit=40&offset=${offset}`, {
-        headers: { "x-rapidapi-key": key } as any, cache: "no-store"
-      });
-      if (!r.ok) continue;
-      const j = await r.json();
-      if (!j.data || j.data.length===0) break;
-      list = list.concat(j.data);
-    } catch {}
-  }
-  const uniq = new Map(); list.forEach((m:any)=>uniq.set(m.id,m));
-  list = Array.from(uniq.values());
-  const out = list.map((m:any,i:number)=>{
-    const scoreStr = m.state?.score?.current || "0 - 0";
-    const p = scoreStr.split("-"); const home=parseInt(p[0])||0; const away=parseInt(p[1])||0;
-    const raw = JSON.stringify(m.state||{}).toLowerCase();
-    const isLive = (m.state?.clock || raw.includes("live") || raw.includes("1h") || raw.includes("2h"));
-    const isFinished = raw.includes("finished");
-    let status="Not started"; if(isLive) status="LIVE"; else if(isFinished) status="FINISHED";
-    const country = m.country?.name? `${m.country.name.toUpperCase()}: ` : "";
-    const leagueName = `${country}${m.league?.name || "Football"}`;
-    return {
-      id: String(m.id||i), league: leagueName,
-      homeTeam: m.homeTeam?.name||"Home", awayTeam: m.awayTeam?.name||"Away",
-      score: { home, away, display: scoreStr }, status,
-      time: m.state?.clock || ""
+"use client";
+import { useEffect, useState } from "react";
+
+export default function Page() {
+  const [data, setData] = useState<any[]>([]);
+  const [filter, setFilter] = useState("LIVE");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/live");
+        const json = await res.json();
+        if (Array.isArray(json)) setData(json);
+      } catch {}
     };
+    load();
+    const t = setInterval(load, 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  const filtered = data.filter((m: any) => {
+    if (filter === "LIVE") return m.status === "LIVE";
+    if (filter === "FINISHED") return m.status === "FINISHED";
+    return true;
   });
-  out.sort((a:any,b:any)=> a.status==="LIVE" && b.status!=="LIVE"? -1 : 0);
-  return NextResponse.json(out);
+
+  const groups: any = {};
+  filtered.forEach((m: any) => {
+    if (!groups[m.league]) groups[m.league] = [];
+    groups[m.league].push(m);
+  });
+
+  return (
+    <div style={{ fontFamily: "Arial", background: "#fff", minHeight: "100vh" }}>
+      <div style={{ background: "#000", color: "#fff", padding: "10px", fontWeight: "bold", fontSize: 18 }}>
+        BESTBOY LIVESCORE
+      </div>
+
+      <div style={{ padding: "6px 10px", fontSize: 14, borderBottom: "1px solid #ccc" }}>
+        <b>Football</b> | Hockey | Tennis | Basketball
+      </div>
+
+      <div style={{ padding: "6px 10px", fontSize: 14, borderBottom: "1px solid #ccc" }}>
+        <b>Today</b> | Yesterday | Tomorrow
+      </div>
+
+      <div style={{ padding: "6px 10px", fontSize: 14 }}>
+        <span onClick={() => setFilter("ALL")} style={{ color: filter==="ALL" ? "#000" : "blue", fontWeight: filter==="ALL"?"bold":undefined, cursor:"pointer" }}>All Games</span> |{" "}
+        <span onClick={() => setFilter("LIVE")} style={{ color: "red", fontWeight: filter==="LIVE"?"bold":undefined, cursor:"pointer" }}>LIVE</span> |{" "}
+        <span onClick={() => setFilter("FINISHED")} style={{ color: filter==="FINISHED" ? "#000" : "blue", fontWeight: filter==="FINISHED"?"bold":undefined, cursor:"pointer" }}>Finished</span>
+      </div>
+
+      <div style={{ background: "#2e7d32", color: "#fff", padding: "6px 10px", fontWeight: "bold", fontSize: 14 }}>
+        Football » Today » {filter} ({filtered.length})
+      </div>
+
+      {Object.keys(groups).length === 0 ? (
+        <div style={{ padding: 20, textAlign: "center" }}>Loading {data.length} games... If white screen, check /api/live</div>
+      ) : (
+        Object.entries(groups).map(([league, games]: any) => (
+          <div key={league}>
+            <div style={{ background: "#000", color: "#fff", padding: "5px 10px", fontSize: 13, fontWeight: "bold" }}>
+              {String(league).toUpperCase()} <span style={{ float: "right", fontWeight: "normal", textDecoration: "underline" }}>Standings</span>
+            </div>
+            {games.map((g: any) => (
+              <div key={g.id} style={{ padding: "5px 10px", borderBottom: "1px solid #ddd", fontSize: 13 }}>
+                <span style={{ minWidth: 40, display: "inline-block" }}>{g.time || g.status}</span>
+                {g.homeTeam} - {g.awayTeam} <b style={{ color: "red" }}>{g.score?.display || "0-0"}</b>
+              </div>
+            ))}
+          </div>
+        ))
+      )}
+    </div>
+  );
 }
