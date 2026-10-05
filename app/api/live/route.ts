@@ -9,42 +9,32 @@ export async function GET() {
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
-
   const fmt = (d:Date)=> d.toISOString().split("T")[0];
-  const dates = [fmt(yesterday), fmt(today)];
 
   let list:any[] = [];
-
-  for(const date of dates){
+  for(const date of [fmt(yesterday), fmt(today)]){
     try{
-      const url = `https://soccer.highlightly.net/matches?date=${date}&limit=40`;
-      const r = await fetch(url, { headers: { "x-rapidapi-key": key } as any, cache: "no-store" });
+      const r = await fetch(`https://soccer.highlightly.net/matches?date=${date}&limit=50`, {
+        headers: { "x-rapidapi-key": key } as any, cache:"no-store"
+      });
       const j = await r.json();
-      const data = j.data || [];
-      list.push(...data);
+      list.push(...(j.data||[]));
     } catch {}
   }
-
-  // Remove duplicates by id
   list = Array.from(new Map(list.map((m:any)=>[m.id,m])).values());
 
-  // Filter tiny leagues
-  list = list.filter((m:any)=>{
-    const n=(m.league?.name||"").toLowerCase();
-    return!["paraibano","rondoniense","acreano","amapaense","piauiense","u19","u20"].some(b=>n.includes(b));
-  });
-
   const out = list.map((m:any,i:number)=>{
-    const scoreStr = m.state?.score?.current || "0 - 0";
+    const scoreStr = m.state?.score?.current || `${m.homeScore??0} - ${m.awayScore??0}`;
     const parts = scoreStr.split("-").map((s:string)=> parseInt(s.trim())||0);
-    const desc = (m.state?.description||"").toLowerCase();
-    const isLive = desc.includes("live")||desc.includes("half")||desc.includes("in play");
-    const isFinished = desc.includes("finish")||desc.includes("ft")||desc.includes("full time")||desc.includes("ended")||desc.includes("aet")||desc.includes("pen");
+
+    // NEW LIVE DETECTOR - checks ALL possible fields
+    const raw = JSON.stringify(m.state||{}).toLowerCase();
+    const isLive = m.state?.status==="live" || m.status==="live" || raw.includes("live") || raw.includes("1h") || raw.includes("2h") || m.state?.isLive===true;
+    const isFinished = m.state?.status==="finished" || raw.includes("finished") || raw.includes("full time") || raw.includes("ft") || raw.includes("aet");
 
     let status = "Not started";
-    if(isLive) status = "LIVE";
-    else if(isFinished) status = "FINISHED";
-    else status = m.state?.description || "Not started";
+    if(isLive) status="LIVE";
+    else if(isFinished) status="FINISHED";
 
     return {
       id: String(m.id||i),
@@ -53,12 +43,11 @@ export async function GET() {
       awayTeam: m.awayTeam?.name||"Away",
       score: { home: parts[0], away: parts[1], display: scoreStr },
       status,
-      time: m.state?.clock||"",
-      date: m.date || m.startDate,
+      time: m.state?.clock || (isLive? "LIVE" : ""),
+      _debug: m.state // remove later, to see real data
     };
   });
 
-  // Sort: LIVE first, then FINISHED, then Not started
   out.sort((a:any,b:any)=>{
     if(a.status==="LIVE" && b.status!=="LIVE") return -1;
     if(b.status==="LIVE" && a.status!=="LIVE") return 1;
@@ -67,5 +56,5 @@ export async function GET() {
     return 0;
   });
 
-  return NextResponse.json(out.slice(0,60));
+  return NextResponse.json(out.slice(0,80));
 }
