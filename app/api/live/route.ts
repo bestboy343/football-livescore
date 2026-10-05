@@ -1,44 +1,50 @@
 export const dynamic = 'force-dynamic';
 
+import { NextResponse } from 'next/server';
+
 export async function GET() {
   try {
-    const key = process.env.HIGHLIGHTLY_KEY!;
+    const key = process.env.HIGHLIGHTLY_API_KEY;
     const today = new Date().toISOString().split('T')[0];
 
-    const url = `https://sports.highlightly.net/football/matches?date=${today}`;
+    const url = `https://soccer.highlightly.net/football/games/today?live=true`;
 
     const res = await fetch(url, {
       headers: {
-        "x-rapidapi-key": key,
-        "x-rapidapi-host": "sports.highlightly.net"
+        'x-rapidapi-key': key!,
+        'x-rapidapi-host': 'soccer.highlightly.net'
       },
-      cache: "no-store"
+      cache: 'no-store'
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      return Response.json({
+      return NextResponse.json({
         matches: [],
-        error: `Highlightly ${res.status} ${JSON.stringify(data)}`,
+        error: `Highlightly ${res.status}: ${JSON.stringify(data)}`,
         url
       });
     }
 
-    const raw = data.data || data.matches || [];
+    const raw = data.data || data.matches || data.result || [];
+
     const matches = raw.map((m:any)=>({
       id: m.id,
-      country: m.country?.name || "World",
-      league: m.league?.name || "League",
-      home: m.homeTeam?.name || "Home",
-      away: m.awayTeam?.name || "Away",
-      score: { home: m.homeTeam?.score?? 0, away: m.awayTeam?.score?? 0 },
-      status: m.status?.description || m.status || "Live",
-      minute: m.minute || m.status?.clock || ""
+      country: m.country?.name || m.league?.country || 'World',
+      league: m.league?.name || 'League',
+      home: m.homeTeam?.name || 'Home',
+      away: m.awayTeam?.name || 'Away',
+      score: {
+        home: m.homeTeam?.score?? m.homeScore?.current?? m.score?.home?? 0,
+        away: m.awayTeam?.score?? m.awayScore?.current?? m.score?.away?? 0
+      },
+      status: m.state || m.status?.description || 'Live',
+      minute: m.minute || m.time || m.status?.liveTime?.short || ''
     }));
 
-    return Response.json({ matches, count: matches.length });
+    return NextResponse.json({ matches, count: matches.length });
   } catch (e:any) {
-    return Response.json({ matches: [], error: e.message });
+    return NextResponse.json({ matches: [], error: e.message });
   }
 }
