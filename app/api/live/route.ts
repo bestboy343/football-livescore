@@ -9,8 +9,8 @@ export async function GET() {
   const today = new Date().toISOString().split("T")[0];
 
   const urls = [
-    `https://soccer.highlightly.net/matches?date=${today}`,
-    `https://sports.highlightly.net/football/matches?date=${today}`,
+    `https://soccer.highlightly.net/matches?date=${today}&limit=40`,
+    `https://sports.highlightly.net/football/matches?date=${today}&limit=40`,
   ];
 
   let list: any[] = [];
@@ -18,57 +18,41 @@ export async function GET() {
   for (const url of urls) {
     try {
       const r = await fetch(url, {
-        headers: { "x-rapidapi-key": key, "x-api-key": key } as any,
+        headers: { "x-rapidapi-key": key } as any,
         cache: "no-store",
       });
-      const text = await r.text();
-      if (!r.ok) {
-        console.log(`FAILED ${url} ${r.status} ${text.slice(0,100)}`);
-        continue;
-      }
-      const j = JSON.parse(text);
-      const data = j.data || j.matches || j.response || [];
-      if (data.length > 0) {
-        list = data;
-        console.log(`SUCCESS ${url} ${data.length} matches`);
-        break;
-      }
-    } catch (e: any) {
-      console.log(`ERROR ${url} ${e.message}`);
-    }
+      if (!r.ok) continue;
+      const j = await r.json();
+      const data = j.data || j.matches || [];
+      if (data.length > 0) { list = data; break; }
+    } catch {}
   }
 
   if (list.length === 0) return NextResponse.json([]);
 
   // Sort big leagues first
-  const order = ["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1", "Champions League", "Europa", "Primeira", "Eredivisie"];
-  const prio = (n: string) => {
-    const idx = order.findIndex(k => n.includes(k));
-    return idx === -1? 99 : idx;
-  };
+  const big = ["Premier League","La Liga","Serie A","Bundesliga","Ligue 1","Champions League","Europa League"];
+  const prio = (n:string) => { const i = big.findIndex(k=>n.includes(k)); return i===-1? 99 : i; };
+  list.sort((a:any,b:any)=> prio(a.league?.name||"") - prio(b.league?.name||""));
 
-  list.sort((a: any, b: any) => {
-    const la = a.league?.name || a.league || "";
-    const lb = b.league?.name || b.league || "";
-    return prio(la) - prio(lb);
-  });
-
-  const out = list.slice(0, 40).map((m: any, i: number) => {
-    const isLive = m.status === "live" || m.state?.status === "live" || m.state?.isLive;
+  const out = list.map((m:any,i:number)=>{
+    const scoreStr = m.state?.score?.current || "0 - 0";
+    const parts = scoreStr.split("-").map((s:string)=> parseInt(s.trim()) || 0);
+    const isLive = m.state?.description?.toLowerCase().includes("live") || m.state?.description?.toLowerCase().includes("half") || m.state?.description?.toLowerCase().includes("in play");
     return {
-      id: m.id || String(i),
-      league: m.league?.name || m.league || "Football",
-      homeTeam: m.homeTeam?.name || m.home_team?.name || m.teams?.home?.name || "Home",
-      awayTeam: m.awayTeam?.name || m.away_team?.name || m.teams?.away?.name || "Away",
+      id: String(m.id || i),
+      league: m.league?.name || "Football",
+      homeTeam: m.homeTeam?.name || "Home",
+      awayTeam: m.awayTeam?.name || "Away",
       score: {
-        home: m.homeScore?? m.score?.home?? m.state?.score?.current?.home?? 0,
-        away: m.awayScore?? m.score?.away?? m.state?.score?.current?.away?? 0,
-        display: m.state?.score?.current? `${m.state.score.current.home} - ${m.state.score.current.away}` : `${m.homeScore?? 0} - ${m.awayScore?? 0}`,
+        home: parts[0]?? 0,
+        away: parts[1]?? 0,
+        display: scoreStr,
       },
-      status: isLive? "LIVE" : "SCHEDULED",
-      time: m.state?.minute? `${m.state.minute}'` : "",
+      status: isLive? "LIVE" : (m.state?.description || "SCHEDULED"),
+      time: m.state?.clock || m.state?.minute? `${m.state.minute}'` : "",
     };
   });
 
-  return NextResponse.json(out, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json(out);
 }
