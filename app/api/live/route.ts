@@ -1,60 +1,63 @@
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 export async function GET() {
   const key = process.env.HIGHLIGHTIFY_KEY || process.env.HIGHLIGHTLY_KEY || "";
   if (!key) return NextResponse.json([]);
 
   const today = new Date().toISOString().split("T")[0];
+  let list: any[] = [];
 
-  let list:any[] = [];
-  // Fetch 3 pages = 120 matches (covers all live)
-  for(const offset of [0,40,80]){
-    try{
+  try {
+    for (const offset of [0, 40, 80]) {
       const url = `https://soccer.highlightly.net/matches?date=${today}&limit=40&offset=${offset}`;
-      const r = await fetch(url, { headers: { "x-rapidapi-key": key } as any, cache:"no-store" });
-      if(!r.ok) continue;
+      const r = await fetch(url, {
+        headers: { "x-rapidapi-key": key } as any,
+        cache: "no-store",
+      });
+      if (!r.ok) continue;
       const j = await r.json();
       const data = j.data || [];
-      if(data.length===0) break;
-      list.push(...data);
-    } catch {}
+      if (data.length === 0) break;
+      list = list.concat(data);
+    }
+  } catch (e) {
+    return NextResponse.json([]);
   }
 
-  // Remove duplicates
-  list = Array.from(new Map(list.map((m:any)=>[m.id,m])).values());
+  const uniq = new Map();
+  list.forEach((m: any) => { if (m.id) uniq.set(m.id, m); });
+  list = Array.from(uniq.values());
 
-  const out = list.map((m:any,i:number)=>{
-    const scoreStr = m.state?.score?.current || "0 - 0";
-    const parts = scoreStr.split("-").map((s:string)=> parseInt(s.trim())||0);
-    const raw = JSON.stringify(m.state||{}).toLowerCase();
-    const isLive = m.state?.clock || raw.includes("1h") || raw.includes("2h") || raw.includes("live") || /^\d+'/.test(m.state?.description||"");
-    const isFinished = (m.state?.description||"").toLowerCase().includes("finished");
+  const out = list.map((m: any, i: number) => {
+    const scoreStr = m.state && m.state.score && m.state.score.current? m.state.score.current : "0 - 0";
+    const parts = scoreStr.split("-");
+    const home = parseInt(parts[0]) || 0;
+    const away = parseInt(parts[1]) || 0;
+
+    const stateStr = JSON.stringify(m.state || {}).toLowerCase();
+    const hasClock = m.state && m.state.clock;
+    const isLive = hasClock || stateStr.includes("live") || stateStr.includes("1h") || stateStr.includes("2h");
+    const isFinished = stateStr.includes("finished");
 
     let status = "Not started";
-    if(isLive) status="LIVE";
-    else if(isFinished) status="FINISHED";
-    else status = m.state?.description || "Not started";
-
-    // Detect minute like 69', 53'
-    const minuteMatch = (m.state?.clock || m.state?.description || "").match(/(\d+)'/);
-    const minute = minuteMatch? `${minuteMatch[1]}'` : (m.state?.clock||"");
+    if (isLive) status = "LIVE";
+    else if (isFinished) status = "FINISHED";
 
     return {
-      id: String(m.id||i),
-      league: m.country?.name? `${m.league?.name} (${m.country.name})` : m.league?.name,
-      homeTeam: m.homeTeam?.name||"Home",
-      awayTeam: m.awayTeam?.name||"Away",
-      score: { home: parts[0], away: parts[1], display: scoreStr },
+      id: String(m.id || i),
+      league: m.league && m.league.name? m.league.name : "Football",
+      homeTeam: m.homeTeam && m.homeTeam.name? m.homeTeam.name : "Home",
+      awayTeam: m.awayTeam && m.awayTeam.name? m.awayTeam.name : "Away",
+      score: { home, away, display: scoreStr },
       status,
-      time: minute,
+      time: m.state && m.state.clock? m.state.clock : "",
     };
   });
 
-  out.sort((a:any,b:any)=>{
-    if(a.status==="LIVE" && b.status!=="LIVE") return -1;
-    if(b.status==="LIVE" && a.status!=="LIVE") return 1;
+  out.sort((a: any, b: any) => {
+    if (a.status === "LIVE" && b.status!== "LIVE") return -1;
+    if (b.status === "LIVE" && a.status!== "LIVE") return 1;
     return 0;
   });
 
