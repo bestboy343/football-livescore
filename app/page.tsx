@@ -1,46 +1,38 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home(){
   const [matches,setMatches]=useState<any[]>([]);
-  const [selected,setSelected]=useState<any>(null);
-  const [detailTab,setDetailTab]=useState("formation");
-  const [time,setTime]=useState("");
-
+  const [sel,setSel]=useState<any>(null);
   useEffect(()=>{
-    setTime(new Date().toLocaleTimeString());
-    const load=()=>fetch('/api/live?v='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>setMatches(Array.isArray(d)?d:[]));
-    load();
-    const i=setInterval(()=>{load(); setTime(new Date().toLocaleTimeString())},30000);
-    return()=>clearInterval(i);
+    fetch("/api/live").then(r=>r.json()).then(d=>setMatches(d));
   },[]);
-
-  if(selected){
+  if(sel){
     return(
-      <div style={{background:'#0a0a0a',minHeight:'100vh',color:'#fff',padding:'12px',fontFamily:'sans-serif'}}>
-        <button onClick={()=>setSelected(null)} style={{background:'#222',color:'#fff',border:'none',padding:'8px 16px',borderRadius:'20px',marginBottom:'12px',fontWeight:'bold'}}>← Back to Live Scores</button>
-        <h1 style={{fontSize:'18px',fontWeight:'900'}}>{selected.homeTeam} vs {selected.awayTeam}</h1>
-        <p style={{color:'#888',fontSize:'12px',marginTop:'4px'}}>{selected.league} • {selected.isLive?<span style={{color:'#22c55e',fontWeight:'bold'}}>● LIVE {selected.minute}'</span>:selected.status} • {selected.score?.display || '0-0'}</p>
-
-        <div style={{display:'flex',gap:'6px',overflowX:'auto',margin:'16px 0'}}>
-          {["Formation","Timeline","Stats","Bracket","Transfers","Trophies"].map(t=>(
-            <button key={t} onClick={()=>setDetailTab(t.toLowerCase())} style={{padding:'7px 14px',borderRadius:'20px',border:'none',fontWeight:'bold',background:detailTab===t.toLowerCase()?'#16a34a':'#222',color:'#fff',fontSize:'13px',whiteSpace:'nowrap'}}>{t}</button>
-          ))}
+      <div style={{background:"#0a0a0a",color:"#fff",minHeight:"100vh",padding:"12px"}}>
+        <button onClick={()=>setSel(null)} style={{padding:"8px 16px",borderRadius:"20px"}}>Back</button>
+        <h2 style={{marginTop:"12px"}}>{sel.homeTeam} vs {sel.awayTeam}</h2>
+        <p style={{color:"#888"}}>{sel.league}</p>
+        <div style={{background:"#15803d",height:"350px",borderRadius:"12px",marginTop:"12px",padding:"12px",border:"2px solid #fff"}}>
+          <div style={{textAlign:"center"}}>GK</div>
+          <div style={{display:"flex",justifyContent:"space-around",marginTop:"40px"}}><span>LB</span><span>CB</span><span>CB</span><span>RB</span></div>
+          <div style={{display:"flex",justifyContent:"space-around",marginTop:"40px"}}><span>CM</span><span>CM</span><span>CM</span></div>
+          <div style={{display:"flex",justifyContent:"space-around",marginTop:"40px"}}><span>LW</span><span>ST</span><span>RW</span></div>
         </div>
-
-        {detailTab==='formation' && (
-          <div>
-            <h2 style={{color:'#22c55e',fontSize:'13px',fontWeight:'bold',marginBottom:'8px'}}>⚽ GAME FORMATION - 4-3-3 - {selected.homeTeam}</h2>
-            <div style={{background:'#15803d',borderRadius:'16px',padding:'16px',height:'420px',border:'2px solid #fff',position:'relative'}}>
-              <div style={{position:'absolute',top:'50%',left:'0',right:'0',height:'2px',background:'#fff5'}}></div>
-              <div style={{textAlign:'center'}}><div style={{background:'#fff',color:'#000',width:'46px',height:'46px',borderRadius:'50%',display:'inline-flex',alignItems:'center',justifyContent:'center',fontWeight:'900',fontSize:'10px',lineHeight:'11px'}}>GK<br/>Raya</div></div>
-              <div style={{display:'flex',justifyContent:'space-around',marginTop:'28px'}}>
-                {["LB Zin","CB Saliba","CB Gabriel","RB White"].map(p=><div key={p} style={{background:'#111',width:'52px',height:'52px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'9px',textAlign:'center',border:'2px solid #fff',fontWeight:'bold'}}>{p}</div>)}
-              </div>
-              <div style={{display:'flex',justifyContent:'space-around',marginTop:'28px'}}>
-                {["CM Øde","CM Rice","CM Havertz"].map(p=><div key={p} style={{background:'#facc15',color:'#000',width:'52px',height:'52px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'9px',textAlign:'center',fontWeight:'900'}}>{p}</div>)}
-              </div>
-              <div style={{display:'flex',justifyContent:'space-around',marginTop:'28px'}}>
-                {["LW Saka","ST Jesus","RW Martinelli"].map(p=><div key={p} style={{background:'#ef4444',width:'56px',height:'56px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'9px',textAlign:'center',fontWeight:'900',border:'2px solid #fff'}}>{p}</div>)}
-              </div>
-            </
+        <div style={{marginTop:"10px",background:"#171717",padding:"10px",borderRadius:"8px"}}>Formation 4-3-3 - Timeline - Stats - Bracket - Transfers - Trophies</div>
+      </div>
+    )
+  }
+  return(
+    <div style={{background:"#0a0a0a",color:"#fff",minHeight:"100vh",padding:"10px"}}>
+      <h1>FOOTBALL LIVE</h1>
+      <p style={{color:"#888",fontSize:"12px"}}>Tap match to see Formation</p>
+      {matches.map((m:any)=>(
+        <div key={m.id} onClick={()=>setSel(m)} style={{background:"#171717",padding:"12px",marginTop:"8px",borderRadius:"10px"}}>
+          <div>{m.homeTeam} vs {m.awayTeam}</div>
+          <div style={{fontSize:"11px",color:"#22c55e"}}>Tap for details</div>
+        </div>
+      ))}
+    </div>
+  )
+}
