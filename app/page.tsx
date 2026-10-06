@@ -4,15 +4,21 @@ import {useEffect,useState} from "react"
 function fmtTime(dateStr:string){
   try{
     const d = new Date(dateStr)
-    return d.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit",timeZone:"Africa/Lagos",hour12:false})
+    return d.toLocaleTimeString("en-GB",{
+      hour:"2-digit",
+      minute:"2-digit",
+      timeZone:"Europe/Paris",
+      hour12:false
+    })
   }catch{ return "--:--" }
 }
 
 export default function Page(){
   const [games,setGames]=useState<any[]>([])
-  useEffect(()=>{ fetch("/api/live").then(r=>r.json()).then(d=>setGames(d.response||[])) },[])
+  useEffect(()=>{
+    fetch("/api/live").then(r=>r.json()).then(d=>setGames(d.response||[]))
+  },[])
 
-  // Group by country + league
   const groups: Record<string, any[]> = {}
   games.forEach((m:any)=>{
     const country = m.country?.name || m.league?.country || "World"
