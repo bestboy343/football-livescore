@@ -1,3 +1,1 @@
-export async function GET(){
-  return Response.json({response:[]})
-}
+export async function GET(){ return Response.json({response:[]}) }
