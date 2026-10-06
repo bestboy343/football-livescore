@@ -14,22 +14,22 @@ export default function Page(){
         <div style={{textAlign:"center",color:"white",fontWeight:900,padding:"18px 0",fontSize:"22px"}}>BESTSCORE • 4 MATCHES</div>
         <div style={{height:"3px",background:"#00bfff"}}></div>
         <div style={{padding:"10px",display:"flex",gap:"6px"}}>
-          <div style={{background:"#00bfff",color:"black",padding:"8px 12px",borderRadius:"8px",fontWeight:900,fontSize:"12px"}}>Today</div>
-          <div style={{background:"#132f45",color:"#00bfff",padding:"8px 12px",borderRadius:"8px",fontWeight:900,fontSize:"12px"}}>Yesterday</div>
-          <div style={{background:"#132f45",color:"#00bfff",padding:"8px 12px",borderRadius:"8px",fontWeight:900,fontSize:"12px"}}>Tomorrow</div>
+          <div style={{background:"#00bfff",color:"black",padding:"10px 14px",borderRadius:"10px",fontWeight:900,fontSize:"13px"}}>Today</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"10px 14px",borderRadius:"10px",fontWeight:900,fontSize:"13px"}}>Yesterday</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"10px 14px",borderRadius:"10px",fontWeight:900,fontSize:"13px"}}>Tomorrow</div>
         </div>
-        <div style={{padding:"0 8px 10px",display:"flex",gap:"4px",alignItems:"center"}}>
-          <div style={{background:"#132f45",color:"white",padding:"6px 8px",borderRadius:"6px",fontWeight:900,textAlign:"center",fontSize:"10px"}}>All<br/>Games</div>
-          <div style={{background:"#132f45",color:"#ff2d2d",padding:"6px 8px",borderRadius:"6px",fontWeight:900,fontSize:"10px"}}>LIVE</div>
-          <div style={{background:"#00bfff",color:"black",padding:"3px 6px",borderRadius:"5px",fontWeight:900,fontSize:"8px"}}>Finished</div>
-          <div style={{background:"#00bfff",color:"black",padding:"3px 5px",borderRadius:"5px",fontWeight:900,fontSize:"7px",textAlign:"center"}}>REFRESH<br/>NOW</div>
+        <div style={{padding:"0 8px 10px",display:"flex",gap:"5px",alignItems:"flex-start"}}>
+          <div style={{background:"#132f45",color:"white",padding:"10px 14px",borderRadius:"10px",fontWeight:900,textAlign:"center",fontSize:"13px"}}>All<br/>Games</div>
+          <div style={{background:"#132f45",color:"#ff2d2d",padding:"12px 16px",borderRadius:"10px",fontWeight:900,fontSize:"13px",height:"fit-content"}}>LIVE</div>
+          <div style={{background:"#00bfff",color:"black",padding:"2px 6px",borderRadius:"4px",fontWeight:900,fontSize:"8px",marginTop:"10px",height:"fit-content"}}>Finished</div>
+          <div style={{background:"#00bfff",color:"black",padding:"2px 6px",borderRadius:"4px",fontWeight:900,fontSize:"7px",textAlign:"center",marginTop:"10px",height:"fit-content"}}>REFRESH<br/>NOW</div>
         </div>
       </div>
       <div style={{padding:"8px"}}>
         {g.map((x,i)=>(
           <div key={i} onClick={()=>setSel(x)} style={{background:"#101a2e",borderRadius:"8px",padding:"12px",display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
-            <div><div style={{color:"#00bfff",fontSize:"10px",fontWeight:700}}>{x.c}: {x.l}</div><div style={{color:"white",fontWeight:700,fontSize:"13px",marginTop:"2px"}}>{x.h} vs {x.a}</div></div>
-            <div style={{color:"#00bfff",fontWeight:900,fontSize:"13px"}}>0 - 0</div>
+            <div><div style={{color:"#00bfff",fontSize:"10px",fontWeight:700}}>{x.c}: {x.l}</div><div style={{color:"white",fontWeight:700,fontSize:"13px"}}>{x.h} vs {x.a}</div></div>
+            <div style={{color:"#00bfff",fontWeight:900}}>0 - 0</div>
           </div>
         ))}
       </div>
