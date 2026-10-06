@@ -2,8 +2,6 @@
 import { useState } from "react"
 export default function Page(){
   const [sel,setSel]=useState<any>(null)
-  const [active,setActive]=useState("Today")
-  const [type,setType]=useState("All")
   const g=[
     {c:"WORLD",l:"Friendlies",h:"Colombia",a:"Peru"},
     {c:"WORLD",l:"Friendlies",h:"Argentina",a:"Benin"},
@@ -15,15 +13,15 @@ export default function Page(){
       <div style={{background:"#0a1e2e"}}>
         <div style={{textAlign:"center",color:"white",fontWeight:900,padding:"18px 0",fontSize:"22px"}}>BESTSCORE • 4 MATCHES</div>
         <div style={{height:"3px",background:"#00bfff"}}></div>
-        <div style={{padding:"10px",display:"flex",gap:"8px"}}>
-          <div onClick={()=>setActive("Today")} style={{background:"#00bfff",color:"black",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Today</div>
-          <div onClick={()=>setActive("Yesterday")} style={{background:"#132f45",color:"#00bfff",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Yesterday</div>
-          <div onClick={()=>setActive("Tomorrow")} style={{background:"#132f45",color:"#00bfff",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Tomorrow</div>
+        <div style={{padding:"10px",display:"flex",gap:"8px",flexWrap:"wrap"}}>
+          <div style={{background:"#00bfff",color:"black",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Today</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Yesterday</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Tomorrow</div>
         </div>
-        <div style={{padding:"0 10px 14px",display:"flex",gap:"8px"}}>
-          <div onClick={()=>setType("All")} style={{background:"#132f45",color:"white",padding:"14px 22px",borderRadius:"14px",fontWeight:900,textAlign:"center",fontSize:"16px",cursor:"pointer",lineHeight:"1.1"}}>All<br/>Games</div>
-          <div onClick={()=>setType("LIVE")} style={{background:"#132f45",color:"#ff2d2d",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>LIVE</div>
-          <div onClick={()=>setType("Finished")} style={{background:"#00bfff",color:"black",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Finished</div>
+        <div style={{padding:"0 10px 14px",display:"flex",gap:"8px",flexWrap:"wrap"}}>
+          <div style={{background:"#132f45",color:"white",padding:"14px 22px",borderRadius:"14px",fontWeight:900,textAlign:"center",fontSize:"16px",cursor:"pointer",lineHeight:"1.1"}}>All<br/>Games</div>
+          <div style={{background:"#132f45",color:"#ff2d2d",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>LIVE</div>
+          <div style={{background:"#00bfff",color:"black",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",cursor:"pointer"}}>Finished</div>
           <div onClick={()=>window.location.reload()} style={{background:"#00bfff",color:"black",padding:"14px 22px",borderRadius:"14px",fontWeight:900,fontSize:"16px",textAlign:"center",cursor:"pointer",lineHeight:"1.1"}}>REFRESH<br/>NOW</div>
         </div>
       </div>
