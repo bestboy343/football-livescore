@@ -1,58 +1,55 @@
 "use client"
 import { useState } from "react"
 
-export default function Page() {
-  const [open, setOpen] = useState<any>(null)
-  const list = [
-    { c: "WORLD", l: "Friendlies", h: "Colombia", a: "Peru" },
-    { c: "WORLD", l: "Friendlies", h: "Argentina", a: "Benin" },
-    { c: "BRAZIL", l: "Serie B", h: "Goias", a: "Athletic" },
-    { c: "ALGERIA", l: "Ligue 1", h: "Saoura", a: "Khenchela" },
+export default function Page(){
+  const [sel,setSel]=useState<any>(null)
+  const g=[
+    {c:"WORLD",l:"Friendlies",h:"Colombia",a:"Peru"},
+    {c:"WORLD",l:"Friendlies",h:"Argentina",a:"Benin"},
+    {c:"BRAZIL",l:"Serie B",h:"Goias",a:"Athletic"},
+    {c:"ALGERIA",l:"Ligue 1",h:"Saoura",a:"Khenchela"},
   ]
-
   return (
-    <div className="min-h-screen bg-black">
-      <div className="bg-[#0e2335]">
-        <div className="text-center text-white font-black text-[23px] py-4">BESTSCORE • 4 MATCHES</div>
-        <div className="h-[3px] bg-[#00bfff]"></div>
-
-        <div className="p-3 flex gap-3">
-          <button className="bg-[#00bfff] text-black font-black px-6 py-3 rounded-xl">Today</button>
-          <button className="bg-[#143049] text-[#00bfff] font-black px-6 py-3 rounded-xl">Yesterday</button>
-          <button className="bg-[#143049] text-[#00bfff] font-black px-6 py-3 rounded-xl">Tomorrow</button>
+    <div style={{minHeight:"100vh",background:"black",margin:0,fontFamily:"Arial"}}>
+      <div style={{background:"#0a1e2e"}}>
+        <div style={{textAlign:"center",color:"white",fontWeight:900,padding:"18px 0",fontSize:"22px"}}>BESTSCORE • 4 MATCHES</div>
+        <div style={{height:"3px",background:"#00bfff"}}></div>
+        <div style={{padding:"12px",display:"flex",gap:"8px"}}>
+          <div style={{background:"#00bfff",color:"black",padding:"12px 20px",borderRadius:"10px",fontWeight:900}}>Today</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"12px 20px",borderRadius:"10px",fontWeight:900}}>Yesterday</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"12px 20px",borderRadius:"10px",fontWeight:900}}>Tomorrow</div>
         </div>
-
-        <div className="p-3 flex gap-2 items-start">
-          <div className="bg-[#143049] text-white font-black rounded-xl px-5 py-4 text-center leading-none">All<br/>Games</div>
-          <div className="bg-[#143049] text-red-500 font-black rounded-xl px-6 py-4 mt-1">LIVE</div>
-          <div className="bg-[#00bfff] text-black font-black rounded-xl px-6 py-4 mt-1">Finished</div>
-          <div className="bg-[#00bfff] text-black font-black rounded-xl flex-1 py-2 text-center">
-            <div>↻</div>
+        <div style={{padding:"0 12px 14px",display:"flex",gap:"8px",alignItems:"flex-start"}}>
+          <div style={{background:"#132f45",color:"white",padding:"14px 18px",borderRadius:"10px",fontWeight:900,textAlign:"center"}}>All<br/>Games</div>
+          <div style={{background:"#132f45",color:"#ff2d2d",padding:"14px 18px",borderRadius:"10px",fontWeight:900,marginTop:"4px"}}>LIVE</div>
+          <div style={{background:"#00bfff",color:"black",padding:"14px 18px",borderRadius:"10px",fontWeight:900,marginTop:"4px"}}>Finished</div>
+          <div style={{background:"#00bfff",color:"black",padding:"10px 18px",borderRadius:"10px",fontWeight:900,flex:1,textAlign:"center"}}>
+            <div style={{fontSize:"14px"}}>↻</div>
             <div>REFRESH</div>
             <div>NOW</div>
           </div>
         </div>
       </div>
 
-      <div className="p-3 space-y-3">
-        {list.map((g, i) => (
-          <div key={i} onClick={() => setOpen(g)} className="bg-[#101c2e] p-4 rounded-xl flex justify-between">
+      <div style={{padding:"10px",display:"flex",flexDirection:"column",gap:"8px"}}>
+        {g.map((x,i)=>(
+          <div key={i} onClick={()=>setSel(x)} style={{background:"#101a2e",borderRadius:"10px",padding:"14px",display:"flex",justifyContent:"space-between",cursor:"pointer"}}>
             <div>
-              <div className="text-[#00bfff] text-[11px] font-bold">{g.c}: {g.l}</div>
-              <div className="text-white font-bold mt-1">{g.h} vs {g.a}</div>
+              <div style={{color:"#00bfff",fontSize:"11px",fontWeight:700}}>{x.c}: {x.l}</div>
+              <div style={{color:"white",fontWeight:700,marginTop:"4px"}}>{x.h} vs {x.a}</div>
             </div>
-            <div className="text-[#00bfff] font-bold">0 - 0</div>
+            <div style={{color:"#00bfff",fontWeight:900}}>0 - 0</div>
           </div>
         ))}
       </div>
 
-      {open && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-5" onClick={() => setOpen(null)}>
-          <div className="bg-[#101c2e] border-2 border-[#00bfff] w-full rounded-2xl p-6">
-            <div className="text-[#00bfff] text-xs">{open.c}: {open.l}</div>
-            <div className="text-white text-xl font-black mt-2">{open.h} vs {open.a}</div>
-            <div className="text-[#00bfff] text-4xl font-black my-5 text-center">0 - 0</div>
-            <button onClick={() => setOpen(null)} className="w-full bg-[#00bfff] text-black font-black py-3 rounded-xl">CLOSE</button>
+      {sel && (
+        <div onClick={()=>setSel(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
+          <div style={{background:"#101a2e",width:"100%",borderRadius:"16px",padding:"20px",border:"2px solid #00bfff"}}>
+            <div style={{color:"#00bfff",fontSize:"12px"}}>{sel.c}: {sel.l}</div>
+            <div style={{color:"white",fontWeight:900,fontSize:"20px",marginTop:"6px"}}>{sel.h} vs {sel.a}</div>
+            <div style={{color:"#00bfff",fontSize:"36px",fontWeight:900,textAlign:"center",margin:"16px 0"}}>0 - 0</div>
+            <div onClick={()=>setSel(null)} style={{background:"#00bfff",color:"black",textAlign:"center",padding:"14px",borderRadius:"12px",fontWeight:900}}>CLOSE</div>
           </div>
         </div>
       )}
