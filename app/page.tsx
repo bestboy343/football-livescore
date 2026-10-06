@@ -1,44 +1,55 @@
-"use client"
-import { useState, useEffect } from "react"
+import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 
-export default function Page(){
-  const [matches, setMatches] = useState<any[]>([])
+export async function GET() {
+  const key = process.env.HIGHLIGHTLY_KEY || "";
+  const today = new Date().toISOString().split("T")[0];
+  const yyyymmdd = today.replace(/-/g, "");
 
-  useEffect(()=>{
-    fetch("/api/livescores").then(r=>r.json()).then(d=>setMatches(d.response||[]))
-  },[])
+  // Try Highlightly first if you have live key
+  if (key && key.startsWith("sk_live_")) {
+    try {
+      const r = await fetch(`https://soccer.highlightly.net/matches?date=${today}&limit=100`, {
+        headers: { "x-rapidapi-key": key, "x-rapidapi-host": "soccer.highlightly.net" },
+        cache: "no-store"
+      });
+      const j = await r.json();
+      if (j.data && j.data.length > 0) {
+        const response = j.data.map((m: any) => {
+          const [h, a] = (m.state?.score?.current || "0 - 0").split("-").map((s: string) => parseInt(s.trim()) || 0);
+          let short = "NS";
+          if (m.state?.description === "Finished") short = "FT";
+          else if ((m.state?.description || "").includes("Progress")) short = "LIVE";
+          return {
+            fixture: { id: m.id, date: m.date, status: { short } },
+            league: { country: m.country?.name || "World", name: m.league?.name || "Football" },
+            teams: { home: { name: m.homeTeam?.name }, away: { name: m.awayTeam?.name } },
+            goals: { home: h, away: a }
+          };
+        });
+        return NextResponse.json({ response });
+      }
+    } catch {}
+  }
 
-  const groups:any={}
-  matches.forEach((m:any)=>{
-    const key = `${m.league.country}: ${m.league.name}`
-    if(!groups[key]) groups[key]=[]
-    groups[key].push(m)
-  })
-
-  return(
-    <div style={{background:"white", color:"black", minHeight:"100vh", fontSize:"14px"}}>
-      <div style={{background:"black", color:"white", padding:"8px", fontWeight:"bold"}}>BESTSCORE</div>
-      {Object.entries(groups).map(([title, list]:any)=>(
-        <div key={title}>
-          <div style={{background:"black", color:"white", padding:"4px 8px", display:"flex", justifyContent:"space-between", fontWeight:"bold"}}>
-            <span>{title.toUpperCase()}</span>
-            <span style={{textDecoration:"underline"}}>Standings</span>
-          </div>
-          {list.map((f:any)=>{
-            const t = new Date(f.fixture.date).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})
-            const status = f.fixture.status.short
-            const show = status==="NS"? t : status
-            const live = ["1H","2H","HT","LIVE"].includes(status)
-            return(
-              <div key={f.fixture.id} style={{display:"flex", padding:"6px 8px", borderBottom:"1px solid #eee"}}>
-                <span style={{width:"50px", color:live?"red":"black", fontWeight:live?"bold":"normal"}}>{show}</span>
-                <span style={{flex:1, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{f.teams.home.name} - {f.teams.away.name}</span>
-                <span style={{fontWeight:"bold", marginLeft:"8px"}}>{f.goals.home?? "-"} - {f.goals.away?? "-"}</span>
-              </div>
-            )
-          })}
-        </div>
-      ))}
-    </div>
-  )
+  // FREE fallback - ESPN API (no key needed, always works) with country + time
+  try {
+    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/misc/events?dates=${yyyymmdd}`, { cache: "no-store" });
+    const json = await res.json();
+    const events = json.events || [];
+    const response = events.map((e: any) => {
+      const comp = e.competitions?.[0];
+      const home = comp?.competitors?.find((c: any) => c.homeAway === "home");
+      const away = comp?.competitors?.find((c: any) => c.homeAway === "away");
+      return {
+        fixture: { id: e.id, date: e.date, status: { short: comp?.status?.type?.shortDetail?.includes("FT")? "FT" : comp?.status?.type?.shortDetail || "NS" } },
+        league: { country: e.league?.name?.split(" ")[0] || "World", name: e.league?.name || comp?.notes?.[0]?.headline || "Football" },
+        teams: { home: { name: home?.team?.displayName || "Home" }, away: { name: away?.team?.displayName || "Away" } },
+        goals: { home: parseInt(home?.score || "0"), away: parseInt(away?.score || "0") }
+      };
+    });
+    return NextResponse.json({ response });
+  } catch (err) {
+    return NextResponse.json({ response: [] });
+  }
 }
