@@ -9,8 +9,8 @@ export default function Page(){
     {c:"ALGERIA",l:"Ligue 1",h:"Saoura",a:"Khenchela"},
   ]
   return(
-    <div style={{minHeight:"100vh",background:"black",width:"100vw",margin:0,padding:0}}>
-      <div style={{background:"#0a1e2e",width:"100%"}}>
+    <div style={{minHeight:"100vh",background:"black"}}>
+      <div style={{background:"#0a1e2e"}}>
         <div style={{textAlign:"center",color:"white",fontWeight:900,padding:"18px 0",fontSize:"22px"}}>BESTSCORE • 4 MATCHES</div>
         <div style={{height:"3px",background:"#00bfff"}}></div>
         <div style={{padding:"10px",display:"flex",gap:"6px"}}>
@@ -18,11 +18,11 @@ export default function Page(){
           <div style={{background:"#132f45",color:"#00bfff",padding:"10px 14px",borderRadius:"10px",fontWeight:900,fontSize:"13px"}}>Yesterday</div>
           <div style={{background:"#132f45",color:"#00bfff",padding:"10px 14px",borderRadius:"10px",fontWeight:900,fontSize:"13px"}}>Tomorrow</div>
         </div>
-        <div style={{padding:"0 8px 10px",display:"flex",gap:"5px",alignItems:"flex-start"}}>
+        <div style={{padding:"0 8px 12px",display:"flex",gap:"6px",alignItems:"center"}}>
           <div style={{background:"#132f45",color:"white",padding:"10px 14px",borderRadius:"10px",fontWeight:900,textAlign:"center",fontSize:"13px"}}>All<br/>Games</div>
-          <div style={{background:"#132f45",color:"#ff2d2d",padding:"12px 16px",borderRadius:"10px",fontWeight:900,fontSize:"13px",height:"fit-content"}}>LIVE</div>
-          <div style={{background:"#00bfff",color:"black",padding:"2px 6px",borderRadius:"4px",fontWeight:900,fontSize:"8px",marginTop:"10px",height:"fit-content"}}>Finished</div>
-          <div style={{background:"#00bfff",color:"black",padding:"2px 6px",borderRadius:"4px",fontWeight:900,fontSize:"7px",textAlign:"center",marginTop:"10px",height:"fit-content"}}>REFRESH<br/>NOW</div>
+          <div style={{background:"#132f45",color:"#ff2d2d",padding:"11px 16px",borderRadius:"10px",fontWeight:900,fontSize:"13px"}}>LIVE</div>
+          <div style={{background:"#00bfff",color:"black",padding:"5px 10px",borderRadius:"6px",fontWeight:900,fontSize:"10px"}}>Finished</div>
+          <div style={{background:"#00bfff",color:"black",padding:"5px 10px",borderRadius:"6px",fontWeight:900,fontSize:"10px",textAlign:"center"}}>REFRESH<br/>NOW</div>
         </div>
       </div>
       <div style={{padding:"8px"}}>
