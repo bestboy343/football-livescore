@@ -14,15 +14,15 @@ export default function Page(){
         <div style={{textAlign:"center",color:"white",fontWeight:900,padding:"18px 0",fontSize:"22px"}}>BESTSCORE • 4 MATCHES</div>
         <div style={{height:"3px",background:"#00bfff"}}></div>
         <div style={{padding:"12px",display:"flex",gap:"8px"}}>
-          <div style={{background:"#00bfff",color:"black",padding:"12px 20px",borderRadius:"10px",fontWeight:900}}>Today</div>
-          <div style={{background:"#132f45",color:"#00bfff",padding:"12px 20px",borderRadius:"10px",fontWeight:900}}>Yesterday</div>
-          <div style={{background:"#132f45",color:"#00bfff",padding:"12px 20px",borderRadius:"10px",fontWeight:900}}>Tomorrow</div>
+          <div style={{background:"#00bfff",color:"black",padding:"10px 16px",borderRadius:"10px",fontWeight:900,fontSize:"14px"}}>Today</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"10px 16px",borderRadius:"10px",fontWeight:900,fontSize:"14px"}}>Yesterday</div>
+          <div style={{background:"#132f45",color:"#00bfff",padding:"10px 16px",borderRadius:"10px",fontWeight:900,fontSize:"14px"}}>Tomorrow</div>
         </div>
-        <div style={{padding:"0 12px 14px",display:"flex",gap:"8px"}}>
-          <div style={{background:"#132f45",color:"white",padding:"14px 18px",borderRadius:"10px",fontWeight:900,textAlign:"center"}}>All<br/>Games</div>
-          <div style={{background:"#132f45",color:"#ff2d2d",padding:"14px 18px",borderRadius:"10px",fontWeight:900}}>LIVE</div>
-          <div style={{background:"#00bfff",color:"black",padding:"14px 18px",borderRadius:"10px",fontWeight:900}}>Finished</div>
-          <div style={{background:"#00bfff",color:"black",padding:"10px 18px",borderRadius:"10px",fontWeight:900,flex:1,textAlign:"center"}}>REFRESH<br/>NOW</div>
+        <div style={{padding:"0 10px 12px",display:"flex",gap:"6px",alignItems:"center"}}>
+          <div style={{background:"#132f45",color:"white",padding:"9px 12px",borderRadius:"8px",fontWeight:900,textAlign:"center",fontSize:"12px",lineHeight:"1.1"}}>All<br/>Games</div>
+          <div style={{background:"#132f45",color:"#ff2d2d",padding:"9px 12px",borderRadius:"8px",fontWeight:900,fontSize:"12px"}}>LIVE</div>
+          <div style={{background:"#00bfff",color:"black",padding:"6px 10px",borderRadius:"8px",fontWeight:900,fontSize:"11px"}}>Finished</div>
+          <div style={{background:"#00bfff",color:"black",padding:"6px 8px",borderRadius:"8px",fontWeight:900,fontSize:"10px",flex:1,textAlign:"center",lineHeight:"1.1"}}>REFRESH<br/>NOW</div>
         </div>
       </div>
       <div style={{padding:"10px"}}>
