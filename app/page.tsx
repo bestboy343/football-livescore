@@ -1,58 +1,43 @@
 "use client"
 import { useState, useEffect } from "react"
 
-function fmtTime(d: string) {
-  try { return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) } catch { return d }
-}
+export default function Page(){
+  const [games,setGames]=useState<any[]>([])
+  const [day,setDay]=useState("today")
+  const [filter,setFilter]=useState("all")
+  const [loading,setLoading]=useState(false)
 
-export default function Page() {
-  const [games, setGames] = useState<any[]>([])
-  const [day, setDay] = useState("today")
-  const [filter, setFilter] = useState("all")
-  const [loading, setLoading] = useState(false)
-
-  const load = async () => {
+  const load=async()=>{
     setLoading(true)
-    try {
-      const res = await fetch(`/api/live?day=${day}&filter=${filter}&t=${Date.now()}`, { cache: 'no-store' })
-      const data = await res.json()
-      setGames(data.response || data.data || [])
-    } catch (e) {
-      console.log(e)
-    } finally {
-      setLoading(false)
-    }
+    try{
+      const r=await fetch(`/api/live?day=${day}&filter=${filter}&t=${Date.now()}`)
+      const d=await r.json()
+      setGames(d.response||d.data||[])
+    }catch(e){}
+    setLoading(false)
   }
 
-  useEffect(() => { load() }, [day, filter])
-
-  const filtered = games
+  useEffect(()=>{load()},[day,filter])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <header className="p-4 flex justify-between items-center bg-black border-b border-zinc-800">
-        <h1 className="text-xl font-black">BESTSCORE</h1>
-        <button onClick={load} className="bg-white text-black px-3 py-1 rounded text-sm font-bold">REFRESH NOW</button>
-      </header>
-
-      <div className="p-4 space-y-3">
-        <div className="flex gap-2">
-          <button onClick={() => setDay("yesterday")} className={`px-4 py-2 rounded ${day==='yesterday'?'bg-white text-black':'bg-zinc-800'}`}>Yesterday</button>
-          <button onClick={() => setDay("today")} className={`px-4 py-2 rounded ${day==='today'?'bg-white text-black':'bg-zinc-800'}`}>Today</button>
-          <button onClick={() => setDay("tomorrow")} className={`px-4 py-2 rounded ${day==='tomorrow'?'bg-white text-black':'bg-zinc-800'}`}>Tomorrow</button>
-        </div>
-
-        <div className="flex gap-2">
-          <button onClick={() => setFilter("all")} className={`px-4 py-1 rounded text-sm ${filter==='all'?'bg-white text-black':'bg-zinc-800'}`}>All Matches</button>
-          <button onClick={() => setFilter("live")} className={`px-4 py-1 rounded text-sm ${filter==='live'?'bg-red-600':'bg-zinc-800'}`}>Live</button>
-          <button onClick={() => setFilter("finished")} className={`px-4 py-1 rounded text-sm ${filter==='finished'?'bg-white text-black':'bg-zinc-800'}`}>Finished</button>
-        </div>
-
-        <p className="text-zinc-400 text-sm">{loading ? 'LOADING...' : `${filtered.length} MATCHES`}</p>
-
-        <div className="space-y-2">
-          {filtered.map((m: any, i: number) => (
-            <div key={m.id || i} className="bg-zinc-900 p-3 rounded flex justify-between items-center">
-              <div className="flex-1">
-                <p className="text-xs text-zinc-500">{m.league?.name || m.competition || 'League'} • {fmtTime(m.date || m.startTime || '')}</p>
-                <p className="font-bold">{m.homeTeam?.name || m.home?.name || 'Home'} vs {m.away
+    <div style={{background:'#0a0a0a',color:'white',minHeight:'100vh',padding:16}}>
+      <h1 style={{fontWeight:900}}>BESTSCORE</h1>
+      <div style={{display:'flex',gap:8,marginTop:12}}>
+        <button onClick={()=>setDay('yesterday')} style={{padding:'6px 12px',background:day==='yesterday'?'white':'#333',color:day==='yesterday'?'black':'white'}}>Yesterday</button>
+        <button onClick={()=>setDay('today')} style={{padding:'6px 12px',background:day==='today'?'white':'#333',color:day==='today'?'black':'white'}}>Today</button>
+        <button onClick={()=>setDay('tomorrow')} style={{padding:'6px 12px',background:day==='tomorrow'?'white':'#333',color:day==='tomorrow'?'black':'white'}}>Tomorrow</button>
+        <button onClick={load} style={{marginLeft:'auto',background:'white',color:'black',padding:'6px 12px'}}>REFRESH NOW</button>
+      </div>
+      <p style={{marginTop:12,color:'#aaa'}}>{loading?'LOADING...':games.length+' MATCHES'}</p>
+      <div style={{marginTop:12}}>
+        {games.map((m:any,i:number)=>(
+          <div key={i} style={{background:'#222',padding:10,marginBottom:8,borderRadius:8}}>
+            <div>{m.league?.name||'League'}</div>
+            <div style={{fontWeight:'bold'}}>{m.homeTeam?.name||m.home?.name} vs {m.awayTeam?.name||m.away?.name}</div>
+            <div>{m.homeScore ?? '-'} : {m.awayScore ?? '-' } - {m.status}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
