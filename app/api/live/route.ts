@@ -1,31 +1,10 @@
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
+export const dynamic='force-dynamic'
+export const revalidate=0
 export async function GET(){
-  const key = process.env.HIGHLIGHTLY_KEY || process.env.HIGHLY_KEY
-  const getDate = (offset: number) => {
-    const d = new Date()
-    d.setDate(d.getDate() + offset)
-    return d.toISOString().split('T')[0]
-  }
-  const yesterday = getDate(-1)
-  const today = getDate(0)
-
-  const fetchDay = async (date: string) => {
-    const res = await fetch(`https://sports.highlightly.net/football/matches?date=${date}`,{
-      headers: { "x-rapidapi-key": key! },
-      cache: "no-store"
-    })
-    const json = await res.json()
-    return json.data || json || []
-  }
-
-  const [yData, tData] = await Promise.all([fetchDay(yesterday), fetchDay(today)])
-
-  // Merge: yesterday finished + today all
-  const all = [...yData,...tData]
-
-  return Response.json({response: all},{
-    headers: {"Cache-Control":"no-store"}
-  })
+ const key=process.env.HIGHLIGHTLY_KEY||process.env.HIGHLY_KEY
+ const d=(o:number)=>{let x=new Date();x.setDate(x.getDate()+o);return x.toISOString().split('T')[0]}
+ const [y,t]=[d(-1),d(0)]
+ const f=async(dt:string)=>{let r=await fetch(`https://sports.highlightly.net/football/matches?date=${dt}`,{headers:{"x-rapidapi-key":key!},cache:"no-store"});let j=await r.json();return j.data||j||[]}
+ const [a,b]=await Promise.all([f(y),f(t)])
+ return Response.json({response:[...a,...b]},{headers:{"Cache-Control":"no-store"}})
 }
