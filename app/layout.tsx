@@ -1,7 +1,9 @@
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({children}:{children:React.ReactNode}){
   return (
-    <html lang="en">
-      <body style={{margin:0, background:"white", fontFamily:"Arial"}}>{children}</body>
+    <html style={{margin:0,padding:0,background:"black",width:"100%",overflowX:"hidden"}}>
+      <body style={{margin:0,padding:0,background:"black",width:"100%",overflowX:"hidden",minHeight:"100vh"}}>
+        {children}
+      </body>
     </html>
   )
 }
