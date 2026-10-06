@@ -1,75 +1,45 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 export default function Page(){
-  const [matches,setMatches]=useState<any[]>([])
-  const [day,setDay]=useState("today")
+  const [day,setDay]=useState("Today")
+  const [filter,setFilter]=useState("Finished")
   const [sel,setSel]=useState<any>(null)
 
-  const load=async()=>{
-    const r=await fetch(`/api/live?day=${day}`)
-    const j=await r.json()
-    setMatches(j.response||[])
-  }
-  useEffect(()=>{load()},[day])
-
-  // Group by league like Flashscore
-  const groups:any={}
-  matches.forEach((m:any)=>{
-    const key = `${m.country||"WORLD"}: ${m.league?.name||"League"}`
-    if(!groups[key]) groups[key]=[]
-    groups[key].push(m)
-  })
+  const demo = [
+    { id:1, c:"WORLD", l:"Friendlies", h:"Colombia", a:"Peru", hs:0, as:0, t:"19:00", s:"Not started" },
+    { id:2, c:"WORLD", l:"Friendlies", h:"Argentina", a:"Benin", hs:0, as:0, t:"20:00", s:"Not started" },
+    { id:3, c:"BRAZIL", l:"Serie B", h:"Goiás", a:"Athletic Club", hs:0, as:0, t:"23:00", s:"Not started" },
+    { id:4, c:"ALGERIA", l:"Ligue 1", h:"JS Saoura", a:"Khenchela", hs:0, as:0, t:"16:00", s:"Postponed" },
+  ]
 
   return(
-    <div className="min-h-screen bg-[#010a14] text-white">
-      <div className="bg-[#001e28] text-center py-3 font-black border-b-2 border-[#00c8ff]">BESTSCORE • {matches.length} MATCHES</div>
+    <div className="min-h-screen bg-black">
+      {/* EXACT BLUE HEADER LIKE YOUR SCREENSHOT */}
+      <div className="bg-[#0a1e2e]">
+        <div className="text-center py-4 font-black text-white text-[22px] tracking-wide border-b-[3px] border-[#00bfff]">BESTSCORE • 4 MATCHES</div>
 
-      <div className="flex gap-1 p-2 bg-[#010a14]">
-        {["Today","Yesterday","Tomorrow"].map(d=>(
-          <button key={d} onClick={()=>setDay(d.toLowerCase())} className={`flex-1 py-2.5 rounded-lg font-bold text-sm ${day===d.toLowerCase()?"bg-[#00c8ff] text-black":"bg-[#0d2433] text-[#00c8ff]"}`}>{d}</button>
-        ))}
-      </div>
-
-      <div className="flex gap-1 px-2 pb-2">
-        <button className="bg-[#00c8ff] text-black flex-1 py-2.5 rounded-lg font-black text-xs">All Games</button>
-        <button className="bg-[#0d2433] text-red-500 flex-1 py-2.5 rounded-lg font-bold text-sm">LIVE</button>
-        <button className="bg-[#0d2433] text-[#00c8ff] flex-1 py-2.5 rounded-lg font-bold text-sm">Finished</button>
-        <button onClick={load} className="bg-[#00c8ff] text-black flex-1 py-2.5 rounded-lg font-black text-xs">↻ REFRESH NOW</button>
-      </div>
-
-      <div className="pb-10">
-        {Object.keys(groups).map((league)=>(
-          <div key={league} className="mb-1">
-            <div className="bg-[#062030] px-3 py-2 text-[12px] font-bold text-[#00c8ff] flex items-center gap-2">
-              <span>⚽</span> {league.toUpperCase()}
-            </div>
-            {groups[league].map((m:any,i:number)=>(
-              <div key={i} onClick={()=>setSel(m)} className="bg-[#0d2433] border-b border-[#0a1e2e] px-3 py-3 flex justify-between items-center active:bg-[#122a3a]">
-                <div className="flex-1">
-                  <div className="text-[13px] leading-tight">{m.homeTeam?.name}<br/><span className="font-bold">{m.awayTeam?.name}</span></div>
-                </div>
-                <div className="text-right min-w-[70px]">
-                  <div className="font-bold text-[#00c8ff] text-[15px]">{m.homeScore} - {m.awayScore}</div>
-                  <div className="text-[10px] text-gray-400">{m.status}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {sel && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={()=>setSel(null)}>
-          <div className="bg-[#0d2433] w-full rounded-2xl p-5 border border-[#00c8ff]">
-            <div className="text-[#00c8ff] text-xs">{sel.country}: {sel.league?.name}</div>
-            <div className="text-white font-bold text-lg mt-2">{sel.homeTeam?.name} vs {sel.awayTeam?.name}</div>
-            <div className="text-[#00c8ff] text-3xl font-black my-3">{sel.homeScore} - {sel.awayScore}</div>
-            <div className="text-gray-400 text-sm">{sel.status} • {sel.time}</div>
-            <button onClick={()=>setSel(null)} className="w-full bg-[#00c8ff] text-black py-3 rounded-xl font-black mt-4">CLOSE</button>
-          </div>
+        <div className="px-4 pt-4 flex gap-3">
+          <button onClick={()=>setDay("Today")} className={`px-6 py-3 rounded-xl font-black text-[16px] ${day==="Today"?"bg-[#00bfff] text-black":"bg-[#112a3a] text-[#00bfff]"}`}>Today</button>
+          <button onClick={()=>setDay("Yesterday")} className={`px-6 py-3 rounded-xl font-black text-[16px] ${day==="Yesterday"?"bg-[#00bfff] text-black":"bg-[#112a3a] text-[#00bfff]"}`}>Yesterday</button>
+          <button onClick={()=>setDay("Tomorrow")} className={`px-6 py-3 rounded-xl font-black text-[16px] ${day==="Tomorrow"?"bg-[#00bfff] text-black":"bg-[#112a3a] text-[#00bfff]"}`}>Tomorrow</button>
         </div>
-      )}
-    </div>
-  )
-}
+
+        <div className="px-4 py-4 flex gap-2 items-center">
+          <button onClick={()=>setFilter("All Games")} className={`px-5 py-4 rounded-xl font-black leading-none ${filter==="All Games"?"bg-[#00bfff] text-black":"bg-[#152d3d] text-white"}`}>All<br/>Games</button>
+          <button onClick={()=>setFilter("LIVE")} className={`flex-1 py-4 rounded-xl font-black text-[16px] ${filter==="LIVE"?"bg-[#00bfff] text-black":"bg-[#152d3d] text-[#ff2222]"}`}>LIVE</button>
+          <button onClick={()=>setFilter("Finished")} className={`flex-1 py-4 rounded-xl font-black text-[16px] ${filter==="Finished"?"bg-[#00bfff] text-black":"bg-[#152d3d] text-white"}`}>Finished</button>
+          <button onClick={()=>window.location.reload()} className="bg-[#00bfff] text-black px-6 py-3 rounded-xl font-black text-[16px] leading-tight text-center">↻<br/>REFRESH<br/>NOW</button>
+        </div>
+      </div>
+
+      {/* 4 DEMO IN BLACK BODY - CLICKABLE */}
+      <div className="p-3 space-y-2 bg-black">
+        {demo.map(m=>(
+          <div key={m.id} onClick={()=>setSel(m)} className="bg-[#101a2e] rounded-xl px-4 py-3 flex justify-between items-center">
+            <div>
+              <div className="text-[11px] text-[#00bfff]">{m.c}: {m.l}</div>
+              <div className="text-white font-bold text-[14px] mt-1">{m.h} vs {m.a}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[#00bfff] font-bold">{m.hs} - {m.as
