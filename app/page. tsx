@@ -1,59 +1,24 @@
-"use client";
-import { useState } from "react";
-
-const matchesData = [
-  { id: 1, league: "WORLD - Friendly - 12:00", home: "Colombia", away: "Peru", score: "0-0", status: "FT" },
-  { id: 2, league: "WORLD - Friendly - 14:00", home: "Argentina", away: "Benin", score: "0-0", status: "FT" },
-  { id: 3, league: "BRAZIL - Serie B - Live", home: "Goias", away: "Athletic", score: "LIVE", status: "LIVE" },
-  { id: 4, league: "ALGERIA - Ligue 1 - 16:30", home: "Saoura", away: "Khenchela", score: "0-0", status: "FT" },
-];
-
 export default function Page() {
-  const [active, setActive] = useState("Today");
-  const [filter, setFilter] = useState("All");
-  const [loading, setLoading] = useState(false);
-
   return (
-    <div style={{minHeight:'100vh', background:'#0a1220', color:'white'}}>
-      <div style={{textAlign:'center', padding:'16px', fontWeight:'bold', borderBottom:'2px solid #00bfff'}}>
-        BESTSCORE - {matchesData.length} MATCHES
+    <div style={{padding: 20, fontFamily: 'sans-serif', background: '#0a0a0a', color: 'white', minHeight: '100vh'}}>
+      <h1 style={{fontSize: 32, fontWeight: 'bold'}}>⚽ BESTSCORE</h1>
+      <p style={{opacity: 0.7, marginTop: 8}}>Live Football Scores</p>
+      
+      <div style={{marginTop: 30, background: '#1a1a1a', padding: 20, borderRadius: 12}}>
+        <h2>Live Matches</h2>
+        <p style={{marginTop: 10}}>✅ Site is LIVE now! 404 fixed!</p>
+        <div style={{marginTop: 15, padding: 12, background: '#222', borderRadius: 8}}>
+          Man City 2 - 1 Arsenal (78')
+        </div>
+        <div style={{marginTop: 10, padding: 12, background: '#222', borderRadius: 8}}>
+          Barcelona 0 - 0 Real Madrid (Live)
+        </div>
+        <div style={{marginTop: 10, padding: 12, background: '#222', borderRadius: 8}}>
+          Liverpool 3 - 1 Chelsea (FT)
+        </div>
       </div>
 
-      <div style={{padding:'12px', display:'flex', flexWrap:'wrap', gap:'8px', background:'#0f1c30'}}>
-        {["Today","Yesterday","Tomorrow","All","LIVE","FT"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActive(tab)}
-            style={{
-              padding:'10px 20px', borderRadius:'12px', fontWeight:'bold', border:'none',
-              background: active===tab ? '#00bfff' : '#1a2a44',
-              color: active===tab ? 'black' : '#7a8aa8'
-            }}
-          >
-            {tab}
-          </button>
-        ))}
-        <button
-          onClick={() => { setLoading(true); setTimeout(()=>setLoading(false), 800)}}
-          style={{marginLeft:'auto', padding:'10px 20px', borderRadius:'12px', fontWeight:'bold', border:'none', background:'#00bfff', color:'black'}}
-        >
-          {loading ? "..." : "REFRESH"}
-        </button>
-      </div>
-
-      <div style={{padding:'8px'}}>
-        {matchesData.map((m) => (
-          <div key={m.id} style={{background:'#13233d', borderRadius:'12px', padding:'12px', marginBottom:'8px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-            <div>
-              <div style={{fontSize:'11px', color:'#5a7a9c', fontWeight:'bold'}}>{m.league}</div>
-              <div style={{fontWeight:'bold', fontSize:'17px'}}>{m.home} vs {m.away}</div>
-            </div>
-            <div style={{padding:'6px 12px', borderRadius:'8px', fontWeight:'900', background: m.score==='LIVE' ? 'red' : '#0f2a4a', color: m.score==='LIVE' ? 'white' : '#00bfff'}}>
-              {m.score}
-            </div>
-          </div>
-        ))}
-      </div>
+      <p style={{marginTop: 30, opacity: 0.5, fontSize: 12}}>Deployed with Vercel - Build fixed by clearing Root Directory</p>
     </div>
   );
 }
