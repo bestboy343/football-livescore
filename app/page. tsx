@@ -1,24 +1,23 @@
 export default function Page() {
   return (
-    <div style={{padding: 20, fontFamily: 'sans-serif', background: '#0a0a0a', color: 'white', minHeight: '100vh'}}>
-      <h1 style={{fontSize: 32, fontWeight: 'bold'}}>⚽ BESTSCORE</h1>
-      <p style={{opacity: 0.7, marginTop: 8}}>Live Football Scores</p>
-      
-      <div style={{marginTop: 30, background: '#1a1a1a', padding: 20, borderRadius: 12}}>
-        <h2>Live Matches</h2>
-        <p style={{marginTop: 10}}>✅ Site is LIVE now! 404 fixed!</p>
-        <div style={{marginTop: 15, padding: 12, background: '#222', borderRadius: 8}}>
-          Man City 2 - 1 Arsenal (78')
-        </div>
-        <div style={{marginTop: 10, padding: 12, background: '#222', borderRadius: 8}}>
-          Barcelona 0 - 0 Real Madrid (Live)
-        </div>
-        <div style={{marginTop: 10, padding: 12, background: '#222', borderRadius: 8}}>
-          Liverpool 3 - 1 Chelsea (FT)
-        </div>
+    <div style={{ backgroundColor: 'black', minHeight: '100vh', color: 'white', padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1 style={{ color: '#22c55e', fontSize: '40px', fontWeight: 'bold', textAlign: 'center' }}>
+        BESTSCORE <span style={{ color: 'white' }}>IS LIVE</span>
+      </h1>
+      <p style={{ textAlign: 'center', marginTop: '20px', color: '#facc15' }}>
+        Football Live Scores - Colors are working!
+      </p>
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '30px', flexWrap: 'wrap' }}>
+        <div style={{ backgroundColor: '#16a34a', padding: '15px 30px', borderRadius: '10px' }}>LIVE</div>
+        <div style={{ backgroundColor: '#2563eb', padding: '15px 30px', borderRadius: '10px' }}>SCORES</div>
+        <div style={{ backgroundColor: '#dc2626', padding: '15px 30px', borderRadius: '10px' }}>GOALS</div>
       </div>
-
-      <p style={{marginTop: 30, opacity: 0.5, fontSize: 12}}>Deployed with Vercel - Build fixed by clearing Root Directory</p>
+      <div style={{ textAlign: 'center', marginTop: '40px', border: '2px solid #22c55e', padding: '20px', borderRadius: '15px' }}>
+        <h2>Today Matches</h2>
+        <p>Man City 2 - 1 Arsenal (Live 78')</p>
+        <p>Chelsea 0 - 0 Liverpool (HT)</p>
+        <p>Barcelona 3 - 1 Real Madrid (FT)</p>
+      </div>
     </div>
   );
 }
